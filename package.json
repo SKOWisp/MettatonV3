@@ -1,0 +1,39 @@
+{
+  "name": "mettatonv3",
+  "version": "1.0.0",
+  "description": "Hopefully a better verion of the Mettaton Discord bot.",
+  "main": "src/Bot.ts",
+  "scripts": {
+    "start": "ts-node src/Bot.ts",
+    "deploy": "ts-node src/Deploy-Commands.ts",
+    "lint": "eslint --fix --ext .ts .",
+    "build": "tsc",
+    "postbuild": "node dist/Bot.js"
+  },
+  "keywords": [],
+  "author": "SKOWisp",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.16.0",
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.3.1",
+    "libsodium-wrappers": "^0.7.11",
+    "url-parse": "^1.5.10",
+    "validator": "^13.9.0",
+    "youtube-dl-exec": "^2.4.6",
+    "ytdl-core": "^4.11.5",
+    "ytpl": "^2.3.0",
+    "ytsr": "^3.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.2",
+    "@types/url-parse": "^1.4.8",
+    "@types/validator": "^13.7.17",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.45.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}
