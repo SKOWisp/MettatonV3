@@ -1,21 +1,21 @@
-import { Track } from './Track';
 import {
 	AudioResource,
 	createAudioResource,
 	demuxProbe,
 } from '@discordjs/voice';
 import ytdl from 'youtube-dl-exec';
+import { SongData } from './SongData';
 
 /**
  * Creates an audio resource from a YT url
- * @param track
+ * @param song
  * @returns
  */
 
-function audioResourceYT(track: Track): Promise <AudioResource<Track>> {
+function audioResourceYT(song: SongData): Promise <AudioResource<SongData>> {
 	return new Promise((resolve, reject) => {
 		const process = ytdl.exec(
-			track.url,
+			song.id,
 			{
 				noPlaylist: true,
 				output: '-',
@@ -41,7 +41,7 @@ function audioResourceYT(track: Track): Promise <AudioResource<Track>> {
 		process
 			.once('spawn', () => {
 				demuxProbe(stream)
-					.then((probe) => resolve(createAudioResource(probe.stream, { metadata: track, inputType: probe.type })))
+					.then((probe) => resolve(createAudioResource(probe.stream, { metadata: song, inputType: probe.type })))
 					.catch(onError);
 			})
 			.catch(onError);

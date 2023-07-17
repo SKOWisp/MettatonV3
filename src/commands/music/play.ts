@@ -3,10 +3,9 @@ import {
 	joinVoiceChannel,
 	VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { SlashCommandBuilder, GuildMember, Message } from 'discord.js';
+import { SlashCommandBuilder, GuildMember } from 'discord.js';
 import { ServerQueue } from '../../voice/serverQueue';
 import { SongData } from '../../voice/SongData';
-import { Track } from '../../voice/Track';
 import { LooseCommandInteraction } from '../../LooseClient';
 import { handleQuery } from '../../utils/handleQuery';
 
@@ -35,17 +34,16 @@ module.exports = {
 
 
 		// Dirty 'as any' cast, but we need it since the command hasn't been built.
-		const tracks: string[] | string = await handleQuery((interaction.options as any).getString('song'));
+		const songs: SongData[] | string = await handleQuery((interaction.options as any).getString('song'));
 
 		// A lone string means handleQuery threw an error
-		if (typeof tracks === 'string') {
-			return interaction.followUp(tracks as string);
+		if (typeof songs === 'string') {
+			return interaction.followUp(songs as string);
 		}
 
 		// If a serverQueue exists and is alive, we add the songs, otherwise it's reset
 		if (serverQueue && serverQueue.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
-			const trackArray = createTrackArray(tracks, interaction);
-			serverQueue.enqueue(trackArray);
+			serverQueue.enqueue(songs);
 			return interaction.followUp('The songs have been added');
 		}
 		else {
@@ -80,35 +78,13 @@ module.exports = {
 		}
 
 		try {
-			const trackArray = createTrackArray(tracks, interaction);
 			// Enqueue the track(s) and reply a success message to the user
-			serverQueue.enqueue(trackArray);
-			return interaction.followUp(`${tracks[0]} has been added to the queue.`);
+			serverQueue.enqueue(songs);
+			return interaction.followUp(`${songs[0].title} has been added to the queue.`);
 		}
 		catch (error) {
 			console.log(error);
-			return interaction.editReply(`Failed to play "${tracks[0]}", please try again later!`);
+			return interaction.editReply(`Failed to play "${songs[0].title}", please try again later!`);
 		}
 	},
 };
-function createTrackArray(tracks: string[], interaction: LooseCommandInteraction) {
-	const newArray = [];
-	for (let i = 0; i < tracks.length; i++) {
-		// Dunno if there is a better way to store the playMessage object :(
-		// But hey it works :D
-		let playMessage: Message<boolean> | void;
-
-		// Create track objects
-		const track = Track.from(tracks[i], {
-			async onStart(song: SongData) {
-				playMessage = await interaction.channel!.send(`Now playing: ${song.title}`).catch(console.warn);
-			},
-			onFinish(song: SongData) {
-				console.log(`Song ${song.title} has ended`);
-				if (playMessage) playMessage.delete().catch(console.warn);
-			},
-		});
-		newArray.push(track);
-	}
-	return newArray;
-}

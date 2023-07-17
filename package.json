@@ -8,7 +8,8 @@
     "deploy": "ts-node src/Deploy-Commands.ts",
     "lint": "eslint --fix --ext .ts .",
     "build": "tsc",
-    "postbuild": "node dist/Bot.js"
+    "postbuild": "node dist/Bot.js",
+    "test": "ts-node test/ytID.ts"
   },
   "keywords": [],
   "author": "SKOWisp",

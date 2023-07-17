@@ -9,7 +9,7 @@ module.exports = {
 			option.setName('skips')
 				.setDescription('# of songs to skip.')
 				.setRequired(false)),
-	execute(interaction: LooseCommandInteraction) {
+	async execute(interaction: LooseCommandInteraction) {
 
 		const channel = (interaction.member as GuildMember).voice.channel;
 		const serverQueue = interaction.client.queues.get(interaction.guildId!);
@@ -32,10 +32,11 @@ module.exports = {
 
 		// Leave voice channel if all remaining songs are skipped
 		// Add 1 tu account for current song
-		if (skips > serverQueue.queue.length + 1 || serverQueue.queue.length === 0) {
+		if (skips > serverQueue.queue.length || serverQueue.queue.length === 0) {
 			serverQueue.eraseQueue();
 			interaction.client.queues.delete(interaction.guildId!);
-			return interaction.reply({ content: 'https://media.tenor.com/doD0ciSXEFEAAAAC/monogatari-nadeko-sengoku.gif' });
+			await interaction.reply({ content: 'https://media.tenor.com/doD0ciSXEFEAAAAC/monogatari-nadeko-sengoku.gif' });
+			return interaction.followUp('Um...i-i should go now. G-Goodbye!');
 		}
 
 		// Slice queue if necessary

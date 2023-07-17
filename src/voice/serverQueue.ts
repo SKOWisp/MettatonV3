@@ -8,13 +8,12 @@ import {
 	VoiceConnectionDisconnectReason,
 	VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { TextBasedChannel } from 'discord.js';
+import { TextBasedChannel, Message } from 'discord.js';
 import { promisify } from 'util';
-import { safeSong } from './safeSong';
 import 'dotenv/config';
 import { audioResourceYT } from './audioResourceYT';
 import { SongData } from './SongData';
-import { Track } from './Track';
+
 
 const wait = promisify(setTimeout);
 
@@ -28,17 +27,19 @@ export class ServerQueue {
 	public readonly timeoutID: any = null;
 	public readonly onCountDown: any = false;
 
-	public queue: Track[];
+	public queue: SongData[];
 	public currentSong: SongData | undefined;
 
 	public prevMembers = null;
-	public queueLock = false;
+	private queueLock = false;
+	private playMessage: Message<boolean> | void;
 
 	public constructor(voiceConnection: VoiceConnection, textChannel: TextBasedChannel) {
 		this.voiceConnection = voiceConnection;
 		this.textChannel = textChannel;
 		this.audioPlayer = createAudioPlayer();
 		this.queue = [];
+		this.playMessage = undefined;
 
 		// Listens to voice connection state changes and acts accordingly
 		this.voiceConnection.on('stateChange', async (_, newState) => {
@@ -104,15 +105,16 @@ export class ServerQueue {
 		});
 
 		// Listens to audio player state changes and acts accordingly
-		this.audioPlayer.on('stateChange', (oldState, newState) => {
+		this.audioPlayer.on('stateChange', async (oldState, newState) => {
 			if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
 				// If the Idle state is entered from a non-Idle state, it means that an audio resource has finished playing.
 				// The queue is then processed to start playing the next track, if one is available.
 
-				const oldRes = (oldState.resource as AudioResource<Track>);
-				if (oldRes.metadata) {
-					oldRes.metadata.onFinish(this.currentSong!);
-				}
+				// Log that the previous son ended
+				const oldResource = (oldState.resource as AudioResource<SongData>);
+				console.log(`Song ${oldResource.metadata.title} has ended`);
+				if (this.playMessage) this.playMessage.delete().catch(console.warn);
+
 				// Process queue if there are songs left
 				if (this.queue) {
 					void this.processQueue();
@@ -121,14 +123,20 @@ export class ServerQueue {
 			else if (newState.status === AudioPlayerStatus.Playing) {
 				// If the Playing state has been entered, then a new track has started playback.
 				// Metadata can't be undefined because it was obtained on song load.
-				console.log(`Now playing: ${this.currentSong!.title}`);
-				(newState.resource as AudioResource<Track>).metadata.onStart(this.currentSong!);
+
+				// Log the that a new song has begun
+				const newResource = (newState.resource as AudioResource<SongData>);
+				this.currentSong = newResource.metadata;
+				console.log(`Now playing: ${newResource.metadata.title}`);
+				this.playMessage = await this.textChannel.send(`Now playing: ${newResource.metadata.title}`).catch(console.warn);
 			}
 		});
 
 		// Handles audio player error
 		this.audioPlayer.on('error', error => {
-			const info = (error.resource as AudioResource<Track>);
+
+			// Log that there were problems streaming the song
+			const info = (error.resource as AudioResource<SongData>);
 			console.warn(`Error while streaming "${info.metadata.title}"": ${error.message}`);
 			textChannel.send(`Error while streaming ${info.metadata.title}`).catch(console.warn);
 		});
@@ -137,12 +145,12 @@ export class ServerQueue {
 	}
 
 	// Adds tracks to the queue, as long as it doensn't exceed the limit
-	public enqueue(tracks: Track[]) {
+	public enqueue(songs: SongData[]) {
 		const difference = Number(process.env.MAX_SONGS) - this.queue.length;
 		if (difference < 0) {
 			return;
 		}
-		const newArray = this.queue.concat(tracks.slice(0, difference));
+		const newArray = this.queue.concat(songs.slice(0, difference));
 		this.queue = newArray;
 		void this.processQueue();
 	}
@@ -157,6 +165,7 @@ export class ServerQueue {
 		this.audioPlayer.stop(true);
 	}
 
+	// Sets up a Track object for the next item in the queue
 	private async processQueue(): Promise<void> {
 		// Return if queue is locked, empty or audio playing.
 		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || this.queue.length === 0) {
@@ -166,24 +175,18 @@ export class ServerQueue {
 		// Lock the queue to guarantee safe access
 		this.queueLock = true;
 
-		// Take the first item from the queue. This is guaranteed to exist due to the non-empty check above.
-		const nextTrack = this.queue.shift()!;
-
-		const info = await safeSong(nextTrack.title);
+		// Take the first item from the queue.
+		const nextSong = this.queue.shift()!;
 		// If getting info fails, try next song
-		if (info === null) {
-			console.log(`ytsr no pudo encontrar ${nextTrack.title}`);
+		if (!nextSong.id) {
+			console.log(`${nextSong.title} has no YT id.`);
 			this.queueLock = false;
 			return this.processQueue();
 		}
 
-		this.currentSong = info!;
-		nextTrack.url = info!.url;
-		nextTrack.title = info!.title;
-
 		try {
 			// Attempt to convert the Track into an AudioResource (i.e. start streaming the video)
-			const resource = await audioResourceYT(nextTrack);
+			const resource = await audioResourceYT(nextSong);
 			this.audioPlayer.play(resource);
 			this.queueLock = false;
 		}

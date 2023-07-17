@@ -2,8 +2,10 @@ import validator from 'validator';
 import URL from 'url-parse';
 import ytpl from 'ytpl';
 import ytdl from 'ytdl-core';
+import { safeSong } from '../voice/safeSong';
+import { SongData } from '../voice/SongData';
 
-const options = {
+const validatorOpts = {
 	require_host: true,
 	host_whitelist: ['youtu.be', 'www.youtube.com', 'youtube.com'],
 };
@@ -11,17 +13,17 @@ const options = {
 const ytHostnames = ['youtu.be', 'www.youtube.com', 'youtube.com'];
 
 /**
- * Reads a query and processes it in case it is a url.
+ * Processes a query into a SongData object or a string in case of error
  * @param query
  * @returns
  */
-async function handleQuery(query: string): Promise<string[] | string> {
+async function handleQuery(query: string): Promise<SongData[] | string> {
 	console.log('Parsing: ' + query);
 
 	query.trim();
 
 	// Query is an invalid link
-	if (validator.isURL(query) && !validator.isURL(query, options)) {
+	if (validator.isURL(query) && !validator.isURL(query, validatorOpts)) {
 		return 'I do not handle that page';
 	}
 
@@ -33,39 +35,56 @@ async function handleQuery(query: string): Promise<string[] | string> {
 		const pathname = parsed.pathname;
 
 		if (pathname === '/watch') {
-			const track: string[] | string = await ytdl.getBasicInfo(query)
+			const song: SongData[] | string = await ytdl.getBasicInfo(query)
 				.then(data => {
-					const title = data.videoDetails.title;
-					const author = data.videoDetails.author.name;
-					return [title + ' ' + author];
+					// Return song data object
+					const video = data.videoDetails;
+					return [new SongData(
+						video.title,
+						video.videoId,
+						video.author.name,
+						video.author.user_url,
+						video.author.avatar,
+						data.thumbnail_url,
+					)];
 				})
 				.catch((err) => {
 					console.warn(err);
 					return 'Try another link';
 				});
-			return track;
+			return song;
 		}
 		else if (pathname === '/playlist') {
-			const tracks: string[] | string = await ytpl(query)
+			const tracks: SongData[] | string = await ytpl(query)
 				.then(data => {
-					const titles = data.items.map(track => {
-						return track.title + ' ' + track.author.name;
+					const songs: SongData[] = data.items.map(video => {
+						// Return song data object per item
+						return new SongData(
+							video.title,
+							video.id,
+							video.author.name,
+							video.author.url,
+							data.author.bestAvatar.url,
+							video.bestThumbnail.url,
+						);
 					});
-					return titles;
+					return songs;
 				})
 				.catch((err) => {
 					console.warn(err);
 					return 'Try another link';
 				});
-			return shuffle(tracks as string[]);
+			return shuffle(tracks as SongData[]);
 		}
 		else {
-			return 'The youtube link appears to be defective, try another one.';
+			return 'The video/playlist seems to be private or doesn\'t exist';
 		}
 	}
 
 	// Query is just a string
-	return [query];
+	const song = await safeSong(query);
+	if (!song) return 'I\'m having trouble retrieving info from YT try again later';
+	return [song];
 }
 
 // Checks if a string is in an array of strings.
@@ -80,12 +99,13 @@ function matches(query: string, array: string[]) {
 }
 
 // declare the function
-function shuffle(array: string[]) {
+function shuffle(array: SongData[]) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
 		[array[i], array[j]] = [array[j], array[i]];
 	}
 	return array;
 }
+
 
 export { handleQuery };
