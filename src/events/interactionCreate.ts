@@ -1,4 +1,4 @@
-import { Events } from 'discord.js';
+import { Events, GuildMember } from 'discord.js';
 import { LooseCommandInteraction } from '../LooseClient';
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 		 * InteractionCreate event occurs.
 		 */
 
-		if (!interaction.isChatInputCommand()) return;
+		if (!interaction.isChatInputCommand() || !(interaction.member instanceof GuildMember)) return;
 
 		const command = interaction.client.commands.get(interaction.commandName);
 

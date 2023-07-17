@@ -22,11 +22,7 @@ module.exports = {
 		// This will take a while, so the reply is deferred
 		await interaction.deferReply();
 
-		if (!(interaction.member instanceof GuildMember)) {
-			return interaction.followUp('Error: Member is not of type GuildMember. Please contact a developer.');
-		}
-
-		const channel = interaction.member?.voice.channel;
+		const channel = (interaction.member as GuildMember).voice.channel;
 
 		// Return if member isn't connected to voice
 		if (!channel) {
@@ -100,21 +96,16 @@ function createTrackArray(tracks: string[], interaction: LooseCommandInteraction
 	for (let i = 0; i < tracks.length; i++) {
 		// Dunno if there is a better way to store the playMessage object :(
 		// But hey it works :D
-		let playMessage: Message<boolean>;
+		let playMessage: Message<boolean> | void;
 
 		// Create track objects
 		const track = Track.from(tracks[i], {
 			async onStart(song: SongData) {
-				playMessage = await interaction.channel!.send(`Now playing: ${song.title}`);
+				playMessage = await interaction.channel!.send(`Now playing: ${song.title}`).catch(console.warn);
 			},
 			onFinish(song: SongData) {
-				try {
-					console.log(`Song ${song.title} has ended`);
-					playMessage.delete().catch(console.warn);
-				}
-				catch (err) {
-					console.warn(err);
-				}
+				console.log(`Song ${song.title} has ended`);
+				if (playMessage) playMessage.delete().catch(console.warn);
 			},
 		});
 		newArray.push(track);

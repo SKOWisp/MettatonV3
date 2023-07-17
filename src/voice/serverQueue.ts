@@ -153,8 +153,8 @@ export class ServerQueue {
 		if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
 			this.voiceConnection.destroy();
 		}
-		this.audioPlayer.stop(true);
 		this.queue = [];
+		this.audioPlayer.stop(true);
 	}
 
 	private async processQueue(): Promise<void> {
