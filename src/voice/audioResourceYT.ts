@@ -3,7 +3,7 @@ import {
 	createAudioResource,
 	demuxProbe,
 } from '@discordjs/voice';
-import ytdl from 'youtube-dl-exec';
+import ytdl, { videoFormat } from 'ytdl-core';
 import { SongData } from './SongData';
 
 /**
@@ -14,37 +14,34 @@ import { SongData } from './SongData';
 
 function audioResourceYT(song: SongData): Promise <AudioResource<SongData>> {
 	return new Promise((resolve, reject) => {
-		const process = ytdl.exec(
-			song.id,
-			{
-				noPlaylist: true,
-				output: '-',
-				format: 'ba[asr=48000][ext=webm][acodec=opus]/ba',
-				limitRate: '100K',
-				quiet: true,
-			},
-			{ stdio: ['ignore', 'pipe', 'ignore'] },
-		);
+		// Filter formats
+		const filter = (format: videoFormat) => {
+			if (format.audioCodec === 'opus' && format.audioBitrate === 48 && !format.hasVideo) {
+				return true;
+			}
+			return false;
+		};
 
-		if (!process.stdout) {
-			reject(new Error('No stdout'));
-			return;
-		}
+		const download = ytdl(song.id, {
+			filter: filter,
+			dlChunkSize: 2048,
+		});
 
-		const stream = process.stdout;
+		// Function to call if there is an error
 		const onError = (error: Error) => {
-			if (!process.killed) process.kill();
-			stream.resume();
+			if (!download.destroyed) download.destroy();
+			download.resume();
 			reject(error);
 		};
 
-		process
-			.once('spawn', () => {
-				demuxProbe(stream)
-					.then((probe) => resolve(createAudioResource(probe.stream, { metadata: song, inputType: probe.type })))
-					.catch(onError);
-			})
-			.catch(onError);
+		// Probe the stream and then create audio resource
+		download.once('readable', async () => {
+			const { stream, type } = await demuxProbe(download);
+			// Example of filtering the formats to audio only.
+			resolve(createAudioResource(stream, { metadata: song, inputType: type }));
+		});
+
+		download.on('error', onError);
 	});
 }
 

@@ -24,13 +24,17 @@ export class ServerQueue {
 	public readonly voiceConnection: VoiceConnection;
 	public readonly textChannel: TextBasedChannel;
 	public readonly audioPlayer: AudioPlayer;
-	public readonly timeoutID: any = null;
-	public readonly onCountDown: any = false;
+	// eslint-disable-next-line no-undef
+	public timeoutID: NodeJS.Timeout | null = null;
 
 	public queue: SongData[];
-	public currentSong: SongData | undefined;
+	private currentSong_: SongData | undefined;
 
-	public prevMembers = null;
+	// Readonly from ouside and both read and write from the inside
+	get currentSong() {
+		return this.currentSong_;
+	}
+
 	private queueLock = false;
 	private playMessage: Message<boolean> | void;
 
@@ -44,7 +48,6 @@ export class ServerQueue {
 		// Listens to voice connection state changes and acts accordingly
 		this.voiceConnection.on('stateChange', async (_, newState) => {
 			// console.log(`Connection transitioned from ${_.status} to ${newState.status}`);
-
 			// Manages reconnection after a disconnect
 			if (newState.status === VoiceConnectionStatus.Disconnected) {
 				if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
@@ -77,12 +80,6 @@ export class ServerQueue {
 					*/
 					this.voiceConnection.destroy();
 				}
-				return;
-			}
-
-			// Manages destruction of the voice connection
-			if (newState.status === VoiceConnectionStatus.Destroyed) {
-				this.eraseQueue();
 				return;
 			}
 
@@ -126,7 +123,7 @@ export class ServerQueue {
 
 				// Log the that a new song has begun
 				const newResource = (newState.resource as AudioResource<SongData>);
-				this.currentSong = newResource.metadata;
+				this.currentSong_ = newResource.metadata;
 				console.log(`Now playing: ${newResource.metadata.title}`);
 				this.playMessage = await this.textChannel.send(`Now playing: ${newResource.metadata.title}`).catch(console.warn);
 			}
@@ -155,12 +152,24 @@ export class ServerQueue {
 		void this.processQueue();
 	}
 
-	// Stops audio player and destroys connection if necessary.
-	public eraseQueue() {
+	/**
+	 * Disconnects bot from voice channel gracefully
+	 * Remember to delete the serverQueue object from the client afterwards
+	 * @param sendMessage Wheter to send a farewell message or not
+	 */
+	public eraseQueue(sendMessage: boolean = false) {
 		console.log('Erasing queue');
+		// Destroy voice connection
 		if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
 			this.voiceConnection.destroy();
 		}
+
+		// Send bye message
+		if (sendMessage) {
+			this.textChannel.send('Disconnecting...');
+		}
+
+		// Erase queue and stop audio player
 		this.queue = [];
 		this.audioPlayer.stop(true);
 	}

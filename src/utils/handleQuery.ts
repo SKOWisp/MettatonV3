@@ -44,7 +44,7 @@ async function handleQuery(query: string): Promise<SongData[] | string> {
 						video.videoId,
 						video.author.name,
 						video.author.user_url,
-						video.author.avatar,
+						video.author.thumbnails![0].url,
 						data.thumbnail_url,
 					)];
 				})

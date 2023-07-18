@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ts-node src/Bot.ts",
     "deploy": "ts-node src/Deploy-Commands.ts",
+    "undeploy": "ts-node test/Delete-Commands.ts",
     "lint": "eslint --fix --ext .ts .",
     "build": "tsc",
     "postbuild": "node dist/Bot.js",
@@ -22,7 +23,6 @@
     "libsodium-wrappers": "^0.7.11",
     "url-parse": "^1.5.10",
     "validator": "^13.9.0",
-    "youtube-dl-exec": "^2.4.6",
     "ytdl-core": "^4.11.5",
     "ytpl": "^2.3.0",
     "ytsr": "^3.8.2"

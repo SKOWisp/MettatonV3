@@ -26,7 +26,7 @@ export async function safeSong(query: string): Promise<SongData | null> {
 	}
 
 	// Filter out non-video elements
-	let ytItem: ytsr.Item;
+	let ytItem: ytsr.Item | null = null;
 	for (let i = 0; i < searchLimit; i++) {
 		if (ytData.items[i].type === 'video') {
 			ytItem = ytData!.items[i];
@@ -35,12 +35,13 @@ export async function safeSong(query: string): Promise<SongData | null> {
 	}
 
 	// Somehow none of the results is of type video....
-	if (!ytItem!) {
+	if (!ytItem) {
 		console.log(`WOW, ${query} did not bring up any videos`);
 		return null;
 	}
 
 	const ytVideo = (ytItem! as ytsr.Video);
+	console.log('Found:' + ytVideo.title);
 	return new SongData(
 		ytVideo.title,
 		ytVideo.url,
