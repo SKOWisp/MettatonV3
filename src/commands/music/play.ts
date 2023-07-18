@@ -44,7 +44,7 @@ module.exports = {
 		// If a serverQueue exists and is alive, we add the songs, otherwise it's reset
 		if (serverQueue && serverQueue.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
 			serverQueue.enqueue(songs);
-			return interaction.followUp('The songs have been added');
+			return enqueueReply(interaction, songs);
 		}
 		else {
 			client.queues.delete(interaction.guildId!);
@@ -77,14 +77,19 @@ module.exports = {
 			return interaction.followUp('Failed to join voice channel within 20 seconds, please try again later!');
 		}
 
-		try {
-			// Enqueue the track(s) and reply a success message to the user
-			serverQueue.enqueue(songs);
-			return interaction.followUp(`${songs[0].title} has been added to the queue.`);
-		}
-		catch (error) {
-			console.log(error);
-			return interaction.editReply(`Failed to play "${songs[0].title}", please try again later!`);
-		}
+		// Enqueue the track(s) and reply a success message to the user
+		// Any errors will arise from playing the song, not from enqueueing it
+		serverQueue.enqueue(songs);
+		enqueueReply(interaction, songs);
 	},
 };
+
+// Reply to the /play interaction depending on the amount of songs added.
+function enqueueReply(interaction: LooseCommandInteraction, songs: SongData[]) {
+	if (songs.length === 1) {
+		interaction.followUp(`${songs[0].title} has been added to the queue.`);
+	}
+	else {
+		interaction.followUp((`${songs[0].title}\n + ${songs.length} more song(s)  have been added to the queue.`));
+	}
+}

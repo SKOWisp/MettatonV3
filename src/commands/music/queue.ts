@@ -1,4 +1,4 @@
-import { GuildMember, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { LooseCommandInteraction } from '../../LooseClient';
 
 module.exports = {
@@ -6,17 +6,10 @@ module.exports = {
 		.setName('queue')
 		.setDescription('Displays the server\'s queue.'),
 	execute(interaction: LooseCommandInteraction) {
-
-		const channel = (interaction.member as GuildMember).voice.channel;
 		const serverQueue = interaction.client.queues.get(interaction.guildId!);
 
 		// Return if there is no severQueue object
 		if (!serverQueue) return interaction.reply({ content: `There is nothing playing on ${interaction.guild!.name}. (?)`, ephemeral: true });
-
-
-		if (!channel || channel.id !== serverQueue.voiceConnection.joinConfig.channelId) {
-			return interaction.reply({ content: 'Join the voice channel first!.', ephemeral: true });
-		}
 
 		/*
 				Printing queue

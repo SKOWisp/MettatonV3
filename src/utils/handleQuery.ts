@@ -50,7 +50,7 @@ async function handleQuery(query: string): Promise<SongData[] | string> {
 				})
 				.catch((err) => {
 					console.warn(err);
-					return 'Try another link';
+					return 'Try another link.';
 				});
 			return song;
 		}
@@ -72,18 +72,18 @@ async function handleQuery(query: string): Promise<SongData[] | string> {
 				})
 				.catch((err) => {
 					console.warn(err);
-					return 'Try another link';
+					return 'Try another link.';
 				});
 			return shuffle(tracks as SongData[]);
 		}
 		else {
-			return 'The video/playlist seems to be private or doesn\'t exist';
+			return 'The video/playlist seems to be private or doesn\'t exist.';
 		}
 	}
 
 	// Query is just a string
 	const song = await safeSong(query);
-	if (!song) return 'I\'m having trouble retrieving info from YT try again later';
+	if (!song) return 'ytsr (looking up yout query in yt) is giving me headaches, try again in a sec.';
 	return [song];
 }
 
