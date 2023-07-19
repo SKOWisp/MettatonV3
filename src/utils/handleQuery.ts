@@ -155,7 +155,7 @@ async function spotifyUrl(query: string): Promise<SongData[] | string> {
 					null,
 				);
 			});
-			return songs;
+			return shuffle(songs);
 		}
 	}).catch((err : any) => {
 		console.warn(err);
