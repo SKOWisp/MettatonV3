@@ -1,2 +1,2 @@
 # MettatonV3
- Hopefully a better verion of the Mettaton Discord bot.
+ Hopefully a better version of the Mettaton Discord bot.
