@@ -22,7 +22,7 @@ function audioResourceYT(song: SongData): Promise <AudioResource<SongData>> {
 			return false;
 		};
 
-		const download = ytdl(song.id, {
+		const download = ytdl(song.id!, {
 			filter: filter,
 			dlChunkSize: 2048,
 		});

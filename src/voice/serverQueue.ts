@@ -13,6 +13,7 @@ import { promisify } from 'util';
 import 'dotenv/config';
 import { audioResourceYT } from './audioResourceYT';
 import { SongData } from './SongData';
+import { safeSong } from './safeSong';
 
 
 const wait = promisify(setTimeout);
@@ -28,7 +29,7 @@ export class ServerQueue {
 	public timeoutID: NodeJS.Timeout | null = null;
 
 	public queue: SongData[];
-	private currentSong_: SongData | undefined;
+	private currentSong_: SongData | null = null;
 
 	// Readonly from ouside and both read and write from the inside
 	get currentSong() {
@@ -172,6 +173,7 @@ export class ServerQueue {
 		// Erase queue and stop audio player
 		this.queue = [];
 		this.audioPlayer.stop(true);
+		this.currentSong_ = null;
 	}
 
 	// Sets up a Track object for the next item in the queue
@@ -185,12 +187,18 @@ export class ServerQueue {
 		this.queueLock = true;
 
 		// Take the first item from the queue.
-		const nextSong = this.queue.shift()!;
-		// If getting info fails, try next song
+		let nextSong: SongData | null = this.queue.shift()!;
+
+		// If song doesn't have an id (retrieved from spotify), look it up
 		if (!nextSong.id) {
 			console.log(`${nextSong.title} has no YT id.`);
-			this.queueLock = false;
-			return this.processQueue();
+			nextSong = await safeSong(nextSong.title);
+
+			// If this fails, try next song
+			if (!nextSong) {
+				this.queueLock = false;
+				return this.processQueue();
+			}
 		}
 
 		try {

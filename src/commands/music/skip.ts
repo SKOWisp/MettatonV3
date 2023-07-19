@@ -35,7 +35,7 @@ module.exports = {
 		if (skips > serverQueue.queue.length || serverQueue.queue.length === 0) {
 			serverQueue.eraseQueue();
 			interaction.client.queues.delete(interaction.guildId!);
-			await interaction.reply({ content: 'https://media.tenor.com/0wbQXbiSEOIAAAAC/senjougahara-senjou.gif' });
+			await interaction.reply({ content: 'https://media.tenor.com/X5v7RZNp8AwAAAAC/monogatari-monogatari-series.gif' });
 			return interaction.channel!.send('why add songs only to skip them?!!?!');
 		}
 

@@ -1,12 +1,12 @@
 export class SongData {
 	public readonly title: string;
-	public readonly id: string;
-	public readonly author: string | undefined;
-	public readonly authorUrl: string | undefined;
-	public readonly avatar: string | undefined | null;
+	public readonly id: string | null;
+	public readonly author: string | null;
+	public readonly authorUrl: string | null;
+	public readonly avatar: string | null;
 	public readonly thumbnail: string | null;
 
-	public constructor(title: string, id: string, author: string | undefined, authorUrl: string | undefined, avatar: string | undefined | null, thubmnail: string | null) {
+	public constructor(title: string, id: string | null, author: string | null, authorUrl: string | null, avatar: string | null, thubmnail: string | null) {
 		this.title = title;
 		this.id = id;
 		this.author = author;

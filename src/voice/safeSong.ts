@@ -19,11 +19,13 @@ export async function safeSong(query: string): Promise<SongData | null> {
 	console.log('Looking up: ' + query);
 
 	// Perform the search
-	const ytData = await ytsr(query, { limit: searchLimit, requestOptions: { options } }).catch((err) => console.warn(err));
-	if (!ytData) {
+	const ytData = await ytsr(query, { limit: searchLimit, requestOptions: { options } }).catch((err) => {
 		console.log(`ytsr could not handle the query: ${query}`);
+		console.warn(err);
 		return null;
-	}
+	});
+
+	if (!ytData) return null;
 
 	// Filter out non-video elements
 	let ytItem: ytsr.Item | null = null;
@@ -41,13 +43,13 @@ export async function safeSong(query: string): Promise<SongData | null> {
 	}
 
 	const ytVideo = (ytItem! as ytsr.Video);
-	console.log('Found:' + ytVideo.title);
+	console.log('Found: ' + ytVideo.title);
 	return new SongData(
 		ytVideo.title,
 		ytVideo.url,
-		ytVideo.author?.name,
-		ytVideo.author?.url,
-		ytVideo.author?.bestAvatar?.url,
+		ytVideo.author?.name ?? null,
+		ytVideo.author?.url ?? null,
+		ytVideo.author?.bestAvatar?.url ?? null,
 		ytVideo.bestThumbnail.url,
 	);
 }
