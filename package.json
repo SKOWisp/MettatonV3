@@ -1,7 +1,7 @@
 {
   "name": "mettatonv3",
   "version": "1.0.8",
-  "description": "Hopefully a better verion of the Mettaton Discord bot.",
+  "description": "Hopefully a better version of the Mettaton Discord bot.",
   "main": "src/Bot.ts",
   "scripts": {
     "start": "ts-node src/Bot.ts",
@@ -9,11 +9,10 @@
     "undeploy": "ts-node test/Delete-Commands.ts",
     "lint": "eslint --fix --ext .ts .",
     "build": "tsc",
-    "test": "ts-node test/spotify-info/test-spotify.ts"
   },
   "keywords": [],
   "author": "SKOWisp",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.16.0",
