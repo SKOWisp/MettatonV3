@@ -1,25 +1,15 @@
 import validator from 'validator';
-import URL from 'url-parse';
+import URLParse from 'url-parse';
 import ytpl from 'ytpl';
 import ytdl from 'ytdl-core';
 import { safeSong } from '../voice/safeSong';
 import { SongData } from '../voice/SongData';
-import URLParse from 'url-parse';
+import { ytHostnames, spotifyHostnames, validatorOpts } from './hostnames';
+import { matches, shuffle } from './utils';
+
 // spotify-url-info modules
 const fetch = require('isomorphic-unfetch');
 const { getData } = require('spotify-url-info')(fetch);
-
-const validatorOpts = {
-	require_host: true,
-	host_whitelist: ['youtu.be', 'www.youtube.com', 'youtube.com', 'open.spotify.com'],
-};
-
-const ytHostnames = ['youtu.be', 'www.youtube.com', 'youtube.com'];
-const spotifyHostnames = ['open.spotify.com', 'play.spotify.com'];
-
-// Global variables
-let parsed: URLParse<string>;
-let hostname: string;
 
 /**
  * Processes a query into a SongData object or a string in case of error
@@ -37,16 +27,15 @@ async function handleQuery(query: string): Promise<SongData[] | string> {
 		return 'I do not handle that page';
 	}
 
-	parsed = new URL(query);
-	hostname = parsed.hostname;
+	const parsed = new URLParse(query);
 
 	// For yt videos and playlists
-	if (matches(hostname, ytHostnames)) {
+	if (matches(parsed.hostname, ytHostnames)) {
 		return await ytUrl(query);
 	}
 
 	// For open.spotify.com links
-	if (matches(hostname, spotifyHostnames)) {
+	if (matches(parsed.hostname, spotifyHostnames)) {
 		return await spotifyUrl(query);
 	}
 
@@ -56,20 +45,9 @@ async function handleQuery(query: string): Promise<SongData[] | string> {
 	return [song];
 }
 
-// Checks if a string is in an array of strings.
-function matches(query: string, array: string[]) {
-	for (let i = 0; i < array.length; i++) {
-		const element = array[i];
-		if (query === element) {
-			return true;
-		}
-	}
-	return false;
-}
-
 // Handles YouTube playlists and videos and returns a SongData[] object
 async function ytUrl(query: string): Promise<SongData[] | string> {
-	const pathname = parsed.pathname;
+	const pathname = new URL(query).pathname;
 
 	if (pathname === '/watch') {
 		const song: SongData[] | string = await ytdl.getBasicInfo(query)
@@ -160,22 +138,11 @@ async function spotifyUrl(query: string): Promise<SongData[] | string> {
 	}).catch((err : any) => {
 		console.warn(err);
 		return `spotify-url-info (what allows me to retrieve info from spotify) 
-		is giving me headaches, try again later. \n
-		P.S. I can't read info from private stuff!!!'`;
+is giving me headaches, try again later. \n
+P.S. I can't read info from private stuff!!!'`;
 	});
 
 	return result;
 }
 
-
-// declare the function
-function shuffle(array: SongData[]) {
-	for (let i = array.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[array[i], array[j]] = [array[j], array[i]];
-	}
-	return array;
-}
-
-
-export { handleQuery };
+export { handleQuery, ytUrl, spotifyUrl };

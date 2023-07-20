@@ -37,14 +37,14 @@ export class ServerQueue {
 	}
 
 	private queueLock = false;
-	private playMessage: Message<boolean> | void;
+	private playMessage: Message<boolean> | null | void;
 
 	public constructor(voiceConnection: VoiceConnection, textChannel: TextBasedChannel) {
 		this.voiceConnection = voiceConnection;
 		this.textChannel = textChannel;
 		this.audioPlayer = createAudioPlayer();
 		this.queue = [];
-		this.playMessage = undefined;
+		this.playMessage = null;
 
 		// Listens to voice connection state changes and acts accordingly
 		this.voiceConnection.on('stateChange', async (_, newState) => {
@@ -112,6 +112,7 @@ export class ServerQueue {
 				const oldResource = (oldState.resource as AudioResource<SongData>);
 				console.log(`Song ${oldResource.metadata.title} has ended`);
 				if (this.playMessage) this.playMessage.delete().catch(console.warn);
+				this.currentSong_ = null;
 
 				// Process queue if there are songs left
 				if (this.queue) {
@@ -143,7 +144,7 @@ export class ServerQueue {
 	}
 
 	// Adds tracks to the queue, as long as it doensn't exceed the limit
-	public enqueue(songs: SongData[]) {
+	public enqueue(songs: SongData[] = ([] as SongData[])) {
 		const difference = Number(process.env.MAX_SONGS) - this.queue.length;
 		if (difference < 0) {
 			return;
@@ -191,7 +192,6 @@ export class ServerQueue {
 
 		// If song doesn't have an id (retrieved from spotify), look it up
 		if (!nextSong.id) {
-			console.log(`${nextSong.title} has no YT id.`);
 			nextSong = await safeSong(nextSong.title);
 
 			// If this fails, try next song

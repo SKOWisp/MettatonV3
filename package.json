@@ -9,7 +9,6 @@
     "undeploy": "ts-node test/Delete-Commands.ts",
     "lint": "eslint --fix --ext .ts .",
     "build": "tsc",
-    "postbuild": "node dist/Bot.js",
     "test": "ts-node test/spotify-info/test-spotify.ts"
   },
   "keywords": [],
