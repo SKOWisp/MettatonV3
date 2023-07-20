@@ -95,7 +95,7 @@ Done! Hop into a voice channel and use the /play command.
 
 ## License
 
-Distributed under the MIT License. See [LICENSE](https://github.com/SKOWisp/MettatonV3/blob/main/LICENSE.md) for more information.
+Distributed under the MIT License. See [LICENSE](https://github.com/SKOWisp/MettatonV3/blob/main/LICENSE) for more information.
 
 ## Authors
 
