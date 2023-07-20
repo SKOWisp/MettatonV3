@@ -25,7 +25,7 @@ module.exports = {
 		// Return if there is no severQueue object
 		if (!serverQueue) {
 			return interaction.followUp({
-				content: `There is nothing playing on ${interaction.guild!.name}! \n use /play instead.`,
+				content: `There is nothing playing on ${interaction.guild!.name}! \n Use /play instead.`,
 				ephemeral: true,
 			});
 		}
