@@ -8,7 +8,7 @@
     "deploy": "ts-node src/Deploy-Commands.ts",
     "undeploy": "ts-node test/Delete-Commands.ts",
     "lint": "eslint --fix --ext .ts .",
-    "build": "tsc",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "SKOWisp",
