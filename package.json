@@ -22,16 +22,14 @@
     "libsodium-wrappers": "^0.7.11",
     "spotify-url-info": "^3.2.6",
     "url-parse": "^1.5.10",
+    "validator": "^13.11.0",
     "ytdl-core": "^4.11.5",
     "ytpl": "^2.3.0",
-    "ytsr": "TimeForANinja/node-ytsr#pull/203/head"
+    "ytsr": "github:TimeForANinja/node-ytsr#pull/203/head"
   },
   "devDependencies": {
-    "@types/node": "^20.4.2",
+    "@types/node": "^20.4.8",
     "@types/url-parse": "^1.4.8",
-    "@types/validator": "^13.7.17",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
     "@types/validator": "^13.9.0",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
