@@ -31,6 +31,7 @@ function audioResourceYT(song: SongData): Promise <AudioResource<SongData>> {
 		const onError = (error: Error) => {
 			if (!download.destroyed) download.destroy();
 			download.resume();
+			console.warn(error);
 			reject(error);
 		};
 

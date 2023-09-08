@@ -44,12 +44,13 @@ export async function safeSong(query: string): Promise<SongData | null> {
 
 	const ytVideo = (ytItem! as ytsr.Video);
 	console.log('Found: ' + ytVideo.title);
+	console.log(ytVideo.thumbnails);
 	return new SongData(
 		ytVideo.title,
 		ytVideo.url,
 		ytVideo.author?.name ?? null,
 		ytVideo.author?.url ?? null,
 		ytVideo.author?.bestAvatar?.url ?? null,
-		ytVideo.bestThumbnail.url,
+		ytVideo.thumbnails[1] ? ytVideo.thumbnails[1].url : ytVideo.bestThumbnail.url,
 	);
 }

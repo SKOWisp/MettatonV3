@@ -49,7 +49,7 @@ export class ServerQueue {
 
 		// Listens to voice connection state changes and acts accordingly
 		this.voiceConnection.on('stateChange', async (_, newState) => {
-			// console.log(`Connection transitioned from ${_.status} to ${newState.status}`);
+			// consolFe.log(`Connection transitioned from ${_.status} to ${newState.status}`);
 			// Manages reconnection after a disconnect
 			if (newState.status === VoiceConnectionStatus.Disconnected) {
 				if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
@@ -136,7 +136,6 @@ export class ServerQueue {
 
 		// Handles audio player error
 		this.audioPlayer.on('error', error => {
-
 			// Log that there were problems streaming the song
 			const info = (error.resource as AudioResource<SongData>);
 			console.warn(`Error while streaming "${info.metadata.title}"": ${error.message}`);

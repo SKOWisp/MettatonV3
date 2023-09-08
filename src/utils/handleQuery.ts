@@ -54,13 +54,14 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 			.then(data => {
 				// Return song data object
 				const video = data.videoDetails;
+
 				return [new SongData(
 					video.title,
-					video.videoId,
+					video.video_url,
 					video.author.name,
 					video.author.user_url ?? null,
 					(video.author.thumbnails) ? video.author.thumbnails[0].url : null,
-					data.thumbnail_url,
+					video.thumbnails[0].url,
 				)];
 			})
 			.catch((err) => {
@@ -74,13 +75,14 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 			.then(data => {
 				const songs: SongData[] = data.items.map(video => {
 					// Return song data object per item
+
 					return new SongData(
 						video.title,
-						video.id,
+						video.url,
 						video.author.name,
 						video.author.url,
 						data.author.bestAvatar.url,
-						video.bestThumbnail.url,
+						video.thumbnails[video.thumbnails.length - 1].url,
 					);
 				});
 				return songs;
