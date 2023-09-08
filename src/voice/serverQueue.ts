@@ -14,6 +14,7 @@ import 'dotenv/config';
 import { audioResourceYT } from './audioResourceYT';
 import { SongData } from './SongData';
 import { safeSong } from './safeSong';
+import { CreatePlayEmbed } from '../utils/embeds';
 
 
 const wait = promisify(setTimeout);
@@ -127,7 +128,9 @@ export class ServerQueue {
 				const newResource = (newState.resource as AudioResource<SongData>);
 				this.currentSong_ = newResource.metadata;
 				console.log(`Now playing: ${newResource.metadata.title}`);
-				this.playMessage = await this.textChannel.send(`Now playing: ${newResource.metadata.title}`).catch(console.warn);
+
+				const embed = await CreatePlayEmbed(newResource.metadata);
+				this.playMessage = await this.textChannel.send({ content: 'Now playing: ', embeds: [embed] }).catch(console.warn);
 			}
 		});
 
