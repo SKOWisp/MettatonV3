@@ -15,7 +15,7 @@ import { audioResourceYT } from './audioResourceYT';
 import { SongData } from './SongData';
 import { safeSong } from './safeSong';
 import { CreatePlayEmbed } from '../utils/embeds';
-
+import { resolve } from 'path';
 
 const wait = promisify(setTimeout);
 
@@ -49,7 +49,6 @@ export class ServerQueue {
 
 		// Listens to voice connection state changes and acts accordingly
 		this.voiceConnection.on('stateChange', async (_, newState) => {
-			// consolFe.log(`Connection transitioned from ${_.status} to ${newState.status}`);
 			// Manages reconnection after a disconnect
 			if (newState.status === VoiceConnectionStatus.Disconnected) {
 				if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
@@ -122,7 +121,6 @@ export class ServerQueue {
 			}
 			else if (newState.status === AudioPlayerStatus.Playing) {
 				// If the Playing state has been entered, then a new track has started playback.
-				// Metadata can't be undefined because it was obtained on song load.
 
 				// Log the that a new song has begun
 				const newResource = (newState.resource as AudioResource<SongData>);
@@ -138,8 +136,13 @@ export class ServerQueue {
 		this.audioPlayer.on('error', error => {
 			// Log that there were problems streaming the song
 			const info = (error.resource as AudioResource<SongData>);
-			console.warn(`Error while streaming "${info.metadata.title}"": ${error.message}`);
-			textChannel.send(`Error while streaming ${info.metadata.title}`).catch(console.warn);
+			console.error(`Error while streaming "${info.metadata.title}": \n ${error.message}`);
+			this.textChannel.send(`Error while streaming ${info.metadata.title}`).catch(console.warn);
+
+			// Process queue if there are songs left
+			if (this.queue) {
+				void this.processQueue();
+			}
 		});
 
 		voiceConnection.subscribe(this.audioPlayer);
@@ -192,8 +195,8 @@ export class ServerQueue {
 		// Take the first item from the queue.
 		let nextSong: SongData | null = this.queue.shift()!;
 
-		// If song doesn't have an id (retrieved from spotify), look it up
-		if (!nextSong.id) {
+		// If song doesn't have an id (e.g. the song was retrieved from spotify), look it up
+		if (!nextSong.url) {
 			nextSong = await safeSong(nextSong.title);
 
 			// If this fails, try next song
@@ -203,16 +206,19 @@ export class ServerQueue {
 			}
 		}
 
-		try {
-			// Attempt to convert the Track into an AudioResource (i.e. start streaming the video)
-			const resource = await audioResourceYT(nextSong);
-			this.audioPlayer.play(resource);
-			this.queueLock = false;
-		}
-		catch (error) {
-			console.log(error);
-			this.queueLock = false;
-			return this.processQueue();
-		}
+
+		// Create an audioResource from the SongData and play it.
+		await audioResourceYT(nextSong)
+			.then(resource => {
+				this.audioPlayer.play(resource);
+				this.queueLock = false;
+				resolve();
+			}).catch(error => {
+				console.error(`Error while creating audio resource from "${nextSong!.title}": \n${error}`);
+				this.textChannel.send(`Error while creating audio resource from "${nextSong!.title}": \n${error}`).catch(console.warn);
+
+				this.queueLock = false;
+				this.processQueue();
+			});
 	}
 }

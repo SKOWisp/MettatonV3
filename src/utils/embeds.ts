@@ -1,10 +1,8 @@
 import { Embed } from 'discord.js';
 import { SongData } from '../voice/SongData';
 import { getAverageColor } from 'fast-average-color-node';
-import { performance } from 'perf_hooks';
 
 export async function CreatePlayEmbed(metadata: SongData): Promise<Embed> {
-	const startTime = performance.now();
 
 	const hexColor: number | void = await getAverageColor(metadata.thumbnail!,
 		{
@@ -18,8 +16,6 @@ export async function CreatePlayEmbed(metadata: SongData): Promise<Embed> {
 			console.warn(e);
 		});
 
-	const endTime = performance.now();
-	console.log(`fast-average-color took ${endTime - startTime} milliseconds`);
 
 	const embed: any = {
 		color: hexColor ? hexColor : 0xfdfdfd,
@@ -28,7 +24,7 @@ export async function CreatePlayEmbed(metadata: SongData): Promise<Embed> {
 			iconURL: `${metadata.avatar}`,
 			url: `${metadata.authorUrl}`,
 		},
-		description: `[${metadata.title}](${metadata.id})`,
+		description: `[${metadata.title}](${metadata.url})`,
 		thumbnail: {
 			url: `${metadata.thumbnail}`,
 		},

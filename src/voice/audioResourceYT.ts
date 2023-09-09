@@ -3,7 +3,7 @@ import {
 	createAudioResource,
 	demuxProbe,
 } from '@discordjs/voice';
-import ytdl, { videoFormat } from 'ytdl-core';
+import ytdl from 'ytdl-core';
 import { SongData } from './SongData';
 
 /**
@@ -11,36 +11,27 @@ import { SongData } from './SongData';
  * @param song
  * @returns
  */
-
 function audioResourceYT(song: SongData): Promise <AudioResource<SongData>> {
 	return new Promise((resolve, reject) => {
-		// Filter formats
-		const filter = (format: videoFormat) => {
-			if (format.audioCodec === 'opus' && format.audioBitrate === 48 && !format.hasVideo) {
-				return true;
-			}
-			return false;
-		};
-
-		const download = ytdl(song.id!, {
-			filter: filter,
+		const download = ytdl(song.url!, {
+			filter: 'audioonly',
+			quality: [249, 250, 171, 251],
 			dlChunkSize: 2048,
 		});
-
-		// Function to call if there is an error
-		const onError = (error: Error) => {
-			if (!download.destroyed) download.destroy();
-			download.resume();
-			console.warn(error);
-			reject(error);
-		};
 
 		// Probe the stream and then create audio resource
 		download.once('readable', async () => {
 			const { stream, type } = await demuxProbe(download);
-			// Example of filtering the formats to audio only.
 			resolve(createAudioResource(stream, { metadata: song, inputType: type }));
 		});
+
+		// Function to call if there is an error
+		// Normally occurs when no video with desired quality is found.
+		const onError = (error: Error) => {
+			if (!download.destroyed) download.destroy();
+			download.resume();
+			reject(error);
+		};
 
 		download.on('error', onError);
 	});
