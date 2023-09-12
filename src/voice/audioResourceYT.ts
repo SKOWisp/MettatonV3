@@ -16,7 +16,7 @@ function audioResourceYT(song: SongData): Promise <AudioResource<SongData>> {
 		const download = ytdl(song.url!, {
 			filter: 'audioonly',
 			quality: [249, 250, 171, 251],
-			dlChunkSize: 2048,
+			dlChunkSize: 0,
 		});
 
 		// Probe the stream and then create audio resource
