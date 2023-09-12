@@ -136,7 +136,7 @@ export class ServerQueue {
 		this.audioPlayer.on('error', error => {
 			// Log that there were problems streaming the song
 			const info = (error.resource as AudioResource<SongData>);
-			console.error(`Error while streaming "${info.metadata.title}": \n ${error.message}`);
+			console.error(`Error while streaming "${info.metadata.title}": \n${error.message}`);
 			this.textChannel.send(`Error while streaming ${info.metadata.title}`).catch(console.warn);
 
 			// Process queue if there are songs left
