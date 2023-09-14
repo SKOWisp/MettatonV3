@@ -66,7 +66,7 @@ export class MettatonStream {
 
 		this.type = StreamType.OggOpus;
 		const args = [
-			'-reconnect',
+			'-reconnect_on_network_error', // '-reconnect'
 			'1',
 			'-reconnect_streamed',
 			'1',
@@ -77,7 +77,7 @@ export class MettatonStream {
 			'-analyzeduration',
 			'0',
 			'-loglevel',
-			'0',
+			'24',
 			'-ar',
 			'48000',
 			'-ac',
