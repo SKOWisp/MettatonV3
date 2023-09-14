@@ -180,7 +180,7 @@ export class ServerQueue {
 	// Sets up a Track object for the next item in the queue
 	private async processQueue(): Promise<void> {
 		// Return if queue is locked, empty or audio playing.
-		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || !this.queue) {
+		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || !this.queue || this.queue.length === 0) {
 			return;
 		}
 
