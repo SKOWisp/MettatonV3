@@ -114,7 +114,10 @@ export class ServerQueue {
 				if (this.playMessage) this.playMessage.delete().catch(console.warn);
 				this.currentSong_ = null;
 
-				this.processQueue();
+				// Process queue if there are songs left
+				if (this.queue) {
+					void this.processQueue();
+				}
 			}
 			else if (newState.status === AudioPlayerStatus.Playing) {
 				// If the Playing state has been entered, then a new track has started playback.
@@ -136,7 +139,10 @@ export class ServerQueue {
 			console.error(`Error while streaming "${info.metadata.title}": \n${error.message}`);
 			this.textChannel.send(`Error while streaming ${info.metadata.title}`).catch(console.warn);
 
-			this.processQueue();
+			// Process queue if there are songs left
+			if (this.queue) {
+				void this.processQueue();
+			}
 		});
 
 		voiceConnection.subscribe(this.audioPlayer);
@@ -150,8 +156,7 @@ export class ServerQueue {
 		}
 		const newArray = this.queue.concat(songs.slice(0, difference));
 		this.queue = newArray;
-
-		this.processQueue();
+		void this.processQueue();
 	}
 
 	/**
@@ -180,7 +185,7 @@ export class ServerQueue {
 	// Sets up a Track object for the next item in the queue
 	private async processQueue(): Promise<void> {
 		// Return if queue is locked, empty or audio playing.
-		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || !this.queue) {
+		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || this.queue.length === 0) {
 			return;
 		}
 
@@ -204,11 +209,8 @@ export class ServerQueue {
 
 		await MettatonStream.YouTube(nextSong.url!)
 			.then(stream => {
-				// eslint-disable-next-line no-undef
-				stream.stream.on('error', (error: NodeJS.ErrnoException) => {
-					if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
+				stream.stream.on('error', error => {
 					console.error(`Error while streaming "${nextSong!.title}": \n${error}`);
-					// this.textChannel.send(`Error while streaming "${nextSong!.title}": \n${error}`).catch(console.warn);
 				});
 
 				const audioResource = createAudioResource(stream.stream, {
