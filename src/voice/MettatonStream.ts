@@ -96,5 +96,8 @@ export class MettatonStream {
 		 */
 		this.stream = new FFmpeg({ args, shell: false });
 		(<any> this.stream)._readableState && ((<any> this.stream)._readableState.highWaterMark = 1 << 25);
+
+		// FFmpeg debug
+		// (<any> this.stream).process.stderr.on('data', (chunk: any) => console.debug('FFmpeg:' + chunk.toString()));
 	}
 }
