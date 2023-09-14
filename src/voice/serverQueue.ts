@@ -3,6 +3,7 @@ import {
 	AudioPlayerStatus,
 	AudioResource,
 	createAudioPlayer,
+	createAudioResource,
 	entersState,
 	VoiceConnection,
 	VoiceConnectionDisconnectReason,
@@ -11,11 +12,10 @@ import {
 import { TextBasedChannel, Message } from 'discord.js';
 import { promisify } from 'util';
 import 'dotenv/config';
-import { audioResourceYT } from './audioResourceYT';
+import { MettatonStream } from './MettatonStream';
 import { SongData } from './SongData';
 import { safeSong } from './safeSong';
 import { CreatePlayEmbed } from '../utils/embeds';
-import { resolve } from 'path';
 
 const wait = promisify(setTimeout);
 
@@ -108,7 +108,7 @@ export class ServerQueue {
 				// If the Idle state is entered from a non-Idle state, it means that an audio resource has finished playing.
 				// The queue is then processed to start playing the next track, if one is available.
 
-				// Log that the previous son ended
+				// Log that the previous song ended
 				const oldResource = (oldState.resource as AudioResource<SongData>);
 				console.log(`Song ${oldResource.metadata.title} has ended`);
 				if (this.playMessage) this.playMessage.delete().catch(console.warn);
@@ -200,22 +200,24 @@ export class ServerQueue {
 			nextSong = await safeSong(nextSong.title);
 
 			// If this fails, try next song
-			if (!nextSong) {
+			if (!nextSong || !nextSong.url) {
+				console.error(`Couldn't find' "${nextSong!.title}"`);
 				this.queueLock = false;
 				return this.processQueue();
 			}
 		}
 
-
-		// Create an audioResource from the SongData and play it.
-		await audioResourceYT(nextSong)
-			.then(resource => {
-				this.audioPlayer.play(resource);
+		await MettatonStream.YouTube(nextSong.url!)
+			.then(stream => {
+				const audioResource = createAudioResource(stream.stream, {
+					inputType: stream.type,
+					metadata: nextSong,
+				});
+				this.audioPlayer.play(audioResource);
 				this.queueLock = false;
-				resolve();
-			}).catch(error => {
+			})
+			.catch(error => {
 				console.error(`Error while creating audio resource from "${nextSong!.title}": \n${error}`);
-				this.textChannel.send(`Error while creating audio resource from "${nextSong!.title}": \n${error}`).catch(console.warn);
 
 				this.queueLock = false;
 				this.processQueue();
