@@ -209,6 +209,10 @@ export class ServerQueue {
 
 		await MettatonStream.YouTube(nextSong.url!)
 			.then(stream => {
+				stream.stream.on('error', error => {
+					console.error(`Error while streaming "${nextSong!.title}": \n${error}`);
+				});
+
 				const audioResource = createAudioResource(stream.stream, {
 					inputType: stream.type,
 					metadata: nextSong,
@@ -218,9 +222,12 @@ export class ServerQueue {
 			})
 			.catch(error => {
 				console.error(`Error while creating audio resource from "${nextSong!.title}": \n${error}`);
+				this.textChannel.send(`Error while creating audio resource from "${nextSong!.title}": \n${error}`).catch(console.warn);
 
 				this.queueLock = false;
 				this.processQueue();
 			});
+
+
 	}
 }
