@@ -66,9 +66,11 @@ export class MettatonStream {
 
 		this.type = StreamType.OggOpus;
 		const args = [
-			'-reconnect_on_network_error', // '-reconnect'
+			'-reconnect',
 			'1',
 			'-reconnect_streamed',
+			'1',
+			'-reconnect_on_network_error',
 			'1',
 			'-reconnect_delay_max',
 			'5',
@@ -77,15 +79,19 @@ export class MettatonStream {
 			'-analyzeduration',
 			'0',
 			'-loglevel',
-			'24',
+			'16',
 			'-ar',
 			'48000',
 			'-ac',
 			'2',
 			'-f',
+			'opus',
+			'-acodec',
+			'libopus',
+			'-b:a',
+			'48k',
 		];
 
-		args.push('opus', '-acodec', 'libopus');
 
 		// if (typeof options.seek === 'number' && options.seek > 0) args.unshift('-ss', options.seek.toString());
 		// if (Array.isArray(options.ffmpegArgs) && options.ffmpegArgs.length) args.push(...options.ffmpegArgs);
@@ -98,6 +104,8 @@ export class MettatonStream {
 		(<any> this.stream)._readableState && ((<any> this.stream)._readableState.highWaterMark = 1 << 25);
 
 		// FFmpeg debug
-		// (<any> this.stream).process.stderr.on('data', (chunk: any) => console.debug('FFmpeg: ' + chunk.toString()));
+		(<any> this.stream).process.stderr.on('data', (chunk: any) => {
+			console.error('FFmpeg: ' + chunk.toString().replace(/\n/g, ''));
+		});
 	}
 }
