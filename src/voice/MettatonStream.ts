@@ -43,7 +43,7 @@ export class MettatonStream {
 		return new MettatonStream(bestFormat.url);
 	}
 
-	type: StreamType;
+	type: StreamType = StreamType.OggOpus;
 	stream: FFmpeg;
 	url: string;
 
@@ -59,38 +59,26 @@ export class MettatonStream {
 		 * @type {string}
 		 */
 		this.url = url;
-		/**
-		 * Stream type
-		 * @type {DiscordVoice.StreamType}
-		 */
 
-		this.type = StreamType.OggOpus;
 		const args = [
-			'-reconnect',
-			'1',
-			'-reconnect_streamed',
-			'1',
-			'-reconnect_on_network_error',
-			'1',
-			'-reconnect_on_http_error',
-			'4xx,5xx',
-			'-reconnect_delay_max',
-			'32',
-			'-i',
-			url,
-			'-analyzeduration',
-			'0',
+			// Reconnect flags. Pray at least one works
+			'-reconnect', '1',
+			'-reconnect_streamed', '1',
+			'-reconnect_on_network_error', '1',
+			'-reconnect_on_http_error', '4xx,5xx',
+			'-reconnect_delay_max', '5',
+
+			// Input
+			'-i', url,
+			// Disable probing
+			'-analyzeduration', '0',
+			// Limit ffmpeg's console spamming
 			'-loglevel', '24', '-hide_banner',
-			'-ar',
-			'48000',
-			'-ac',
-			'2',
-			'-f',
-			'opus',
-			'-acodec',
-			'libopus',
-			'-b:a',
-			'48k',
+			// Audio options
+			'-ar', '48000',
+			'-ac', '2',
+			'-f', 'opus',
+			'-acodec', 'libopus', '-b:a', '48k',
 		];
 
 

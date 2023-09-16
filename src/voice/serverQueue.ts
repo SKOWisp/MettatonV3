@@ -177,7 +177,7 @@ export class ServerQueue {
 		this.currentSong_ = null;
 	}
 
-	// Sets up a Track object for the next item in the queue
+	// Creates the next audioResource
 	private async processQueue(): Promise<void> {
 		// Return if queue is locked, empty or audio playing.
 		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || !this.queue || this.queue.length === 0) {
@@ -203,16 +203,16 @@ export class ServerQueue {
 		}
 
 		await MettatonStream.YouTube(nextSong.url!)
-			.then(stream => {
+			.then(ffmpeg => {
 				// eslint-disable-next-line no-undef
-				stream.stream.on('error', (error: NodeJS.ErrnoException) => {
+				ffmpeg.stream.on('error', (error: NodeJS.ErrnoException) => {
 					if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
-					console.error(`FFmpeg: ${error}`);
 					this.textChannel.send(`Error while streaming "${nextSong!.title}": \n${error}`).catch(console.warn);
+					throw error;
 				});
 
-				const audioResource = createAudioResource(stream.stream, {
-					inputType: stream.type,
+				const audioResource = createAudioResource(ffmpeg.stream, {
+					inputType: ffmpeg.type,
 					metadata: nextSong,
 				});
 				this.audioPlayer.play(audioResource);
