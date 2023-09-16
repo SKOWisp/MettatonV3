@@ -208,7 +208,7 @@ export class ServerQueue {
 				stream.stream.on('error', (error: NodeJS.ErrnoException) => {
 					if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
 					console.error(`FFmpeg: ${error}`);
-					// this.textChannel.send(`Error while streaming "${nextSong!.title}": \n${error}`).catch(console.warn);
+					this.textChannel.send(`Error while streaming "${nextSong!.title}": \n${error}`).catch(console.warn);
 				});
 
 				const audioResource = createAudioResource(stream.stream, {

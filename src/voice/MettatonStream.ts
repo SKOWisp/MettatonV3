@@ -72,14 +72,15 @@ export class MettatonStream {
 			'1',
 			'-reconnect_on_network_error',
 			'1',
+			'-reconnect_on_http_error',
+			'4xx,5xx',
 			'-reconnect_delay_max',
-			'5',
+			'32',
 			'-i',
 			url,
 			'-analyzeduration',
 			'0',
-			'-loglevel',
-			'16',
+			'-loglevel', '24', '-hide_banner',
 			'-ar',
 			'48000',
 			'-ac',
@@ -105,7 +106,9 @@ export class MettatonStream {
 
 		// FFmpeg debug
 		(<any> this.stream).process.stderr.on('data', (chunk: any) => {
-			console.error('FFmpeg: ' + chunk.toString().replace(/\n/g, ''));
+			const info = chunk.toString();
+			// if (info.startsWith('size=')) return;
+			console.error('FFmpeg: ' + info.replace(/\n+$/, ''));
 		});
 	}
 }
