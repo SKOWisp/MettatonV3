@@ -1,4 +1,4 @@
-import {
+﻿import {
 	AudioPlayer,
 	AudioPlayerStatus,
 	AudioResource,
@@ -13,7 +13,7 @@ import { TextBasedChannel, Message } from 'discord.js';
 import { promisify } from 'util';
 import 'dotenv/config';
 import { MettatonStream, SongData, safeSong } from '.';
-import { CreatePlayEmbed } from '../utils/embeds';
+import { createPlayMessage } from '..';
 
 const wait = promisify(setTimeout);
 
@@ -122,8 +122,8 @@ export class ServerQueue {
 				this.currentSong_ = newResource.metadata;
 				console.log(`Now playing: ${newResource.metadata.name}`);
 
-				const embed = await CreatePlayEmbed(newResource.metadata);
-				this.playMessage = await this.textChannel.send({ content: 'Now playing: ', embeds: [embed] }).catch(console.warn);
+				const pMessage = await createPlayMessage(newResource.metadata);
+				this.playMessage = await this.textChannel.send(pMessage).catch(console.warn);
 			}
 		});
 
