@@ -1,6 +1,7 @@
 import ytdl from 'ytdl-core';
 import ytpl from 'ytpl';
 import ytsr from 'ytsr';
+import validator from 'validator';
 
 export class SongData {
 	// The only real requirement is a string that can be looked-up later
@@ -56,7 +57,9 @@ export class SongData {
 			pageURL: details.author.user_url,
 			avatarURL: (details.author.thumbnails) ? details.author.thumbnails[0].url : undefined,
 		};
-		this.thumnailURL = details.thumbnails[0].url;
+
+		const bestThumbnail = details.thumbnails.filter(t => t.width < 336).pop();
+		this.thumnailURL = bestThumbnail!.url;
 		this.duration = details.lengthSeconds;
 	}
 
