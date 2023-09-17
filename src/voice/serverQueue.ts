@@ -12,9 +12,7 @@ import {
 import { TextBasedChannel, Message } from 'discord.js';
 import { promisify } from 'util';
 import 'dotenv/config';
-import { MettatonStream } from './MettatonStream';
-import { SongData } from './SongData';
-import { safeSong } from './safeSong';
+import { MettatonStream, SongData, safeSong } from '.';
 import { CreatePlayEmbed } from '../utils/embeds';
 
 const wait = promisify(setTimeout);
@@ -64,7 +62,7 @@ export class ServerQueue {
 						// Probably moved voice channel
 					}
 					catch {
-						this.voiceConnection.destroy();
+						this.eraseQueue();
 						// Probably removed from voice channel
 					}
 				}
@@ -79,7 +77,7 @@ export class ServerQueue {
 					/*
 						The disconnect in this case may be recoverable, but we have no more remaining attempts - destroy.
 					*/
-					this.voiceConnection.destroy();
+					this.eraseQueue();
 				}
 				return;
 			}
@@ -97,7 +95,7 @@ export class ServerQueue {
 				}
 				catch {
 					// Destroys voice connection if stuck in the Signalling or Connecting states
-					if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+					this.voiceConnection.destroy();
 				}
 			}
 		});
@@ -110,7 +108,7 @@ export class ServerQueue {
 
 				// Log that the previous song ended
 				const oldResource = (oldState.resource as AudioResource<SongData>);
-				console.log(`Song ${oldResource.metadata.title} has ended`);
+				console.log(`Song ${oldResource.metadata.name} has ended`);
 				if (this.playMessage) this.playMessage.delete().catch(console.warn);
 				this.currentSong_ = null;
 
@@ -122,7 +120,7 @@ export class ServerQueue {
 				// Log the that a new song has begun
 				const newResource = (newState.resource as AudioResource<SongData>);
 				this.currentSong_ = newResource.metadata;
-				console.log(`Now playing: ${newResource.metadata.title}`);
+				console.log(`Now playing: ${newResource.metadata.name}`);
 
 				const embed = await CreatePlayEmbed(newResource.metadata);
 				this.playMessage = await this.textChannel.send({ content: 'Now playing: ', embeds: [embed] }).catch(console.warn);
@@ -133,8 +131,8 @@ export class ServerQueue {
 		this.audioPlayer.on('error', error => {
 			// Log that there were problems streaming the song
 			const info = (error.resource as AudioResource<SongData>);
-			console.error(`Error while streaming "${info.metadata.title}": \n${error.message}`);
-			this.textChannel.send(`Error while streaming ${info.metadata.title}`).catch(console.warn);
+			console.error(`Error while streaming "${info.metadata.name}": \n${error.message}`);
+			this.textChannel.send(`Error while streaming ${info.metadata.name}`).catch(console.warn);
 
 			this.processQueue();
 		});
@@ -191,36 +189,37 @@ export class ServerQueue {
 		let nextSong: SongData | null = this.queue.shift()!;
 
 		// If song doesn't have an id (e.g. the song was retrieved from spotify), look it up
-		if (!nextSong.url) {
-			nextSong = await safeSong(nextSong.title);
+		if (!nextSong.urlYT) {
+			nextSong = await safeSong(nextSong.name);
 
 			// If this fails, try next song
-			if (!nextSong || !nextSong.url) {
-				console.error(`Couldn't find' "${nextSong!.title}"`);
+			if (!nextSong || !nextSong.urlYT) {
+				console.error(`Couldn't find' "${nextSong!.name}"`);
 				this.queueLock = false;
 				return this.processQueue();
 			}
 		}
 
-		await MettatonStream.YouTube(nextSong.url!)
-			.then(ffmpeg => {
+		await MettatonStream.YouTube(nextSong.urlYT!)
+			.then(mttstream => {
 				// eslint-disable-next-line no-undef
-				ffmpeg.stream.on('error', (error: NodeJS.ErrnoException) => {
+				mttstream.stream.on('error', (error: NodeJS.ErrnoException) => {
 					if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
-					this.textChannel.send(`Error while streaming "${nextSong!.title}": \n${error}`).catch(console.warn);
+					this.textChannel.send(`Error while streaming "${nextSong!.name}": \n${error}`).catch(console.warn);
 					throw error;
 				});
 
-				const audioResource = createAudioResource(ffmpeg.stream, {
-					inputType: ffmpeg.type,
+				nextSong = mttstream.songdata;
+				const audioResource = createAudioResource(mttstream.stream, {
+					inputType: mttstream.type,
 					metadata: nextSong,
 				});
 				this.audioPlayer.play(audioResource);
 				this.queueLock = false;
 			})
 			.catch(error => {
-				console.error(`Error while creating audio resource from "${nextSong!.title}": \n${error}`);
-				this.textChannel.send(`Error while creating audio resource from "${nextSong!.title}": \n${error}`).catch(console.warn);
+				console.error(`Error while creating audio resource from "${nextSong!.name}": \n${error}`);
+				this.textChannel.send(`Error while creating audio resource from "${nextSong!.name}": \n${error}`).catch(console.warn);
 
 				this.queueLock = false;
 				this.processQueue();

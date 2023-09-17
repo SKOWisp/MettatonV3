@@ -9,7 +9,7 @@ module.exports = {
 		const serverQueue = interaction.client.queues.get(interaction.guildId!);
 
 		// Return if there is no severQueue object
-		if (!serverQueue) return interaction.reply({ content: `There is nothing playing on ${interaction.guild!.name}. (?)`, ephemeral: true });
+		if (!serverQueue || !serverQueue.queue.length) return interaction.reply({ content: `There is nothing playing on ${interaction.guild!.name}. (?)`, ephemeral: true });
 
 		/*
 				Printing queue
@@ -17,10 +17,10 @@ module.exports = {
 		let i = 1;
 		const titles = serverQueue.queue.map(track => {
 			i++;
-			return i + '.- ' + track.title;
+			return i + '.- ' + track.name;
 		});
 
-		const numSongs = titles.unshift('**CURRENT SONG:** ' + serverQueue.currentSong!.title);
+		const numSongs = titles.unshift('**CURRENT SONG:** ' + (serverQueue.currentSong ? serverQueue.currentSong.name : '---'));
 		let description = titles.slice(0, 19).join('\n');
 		if (numSongs > 19) {
 			const difference = numSongs - 19;

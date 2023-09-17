@@ -5,7 +5,7 @@ import {
 } from '@discordjs/voice';
 import { SlashCommandBuilder, GuildMember } from 'discord.js';
 import { ServerQueue } from '../../voice/serverQueue';
-import { SongData } from '../../voice/SongData';
+import { SongData } from '../..';
 import { LooseCommandInteraction } from '../../LooseClient';
 import { handleQuery } from '../../utils/handleQuery';
 
@@ -87,9 +87,9 @@ module.exports = {
 // Reply to the /play interaction depending on the amount of songs added.
 function enqueueReply(interaction: LooseCommandInteraction, songs: SongData[]) {
 	if (songs.length === 1) {
-		interaction.followUp(`${songs[0].title} has been added to the queue.`);
+		interaction.followUp(`${songs[0].name} has been added to the queue.`);
 	}
 	else {
-		interaction.followUp((`${songs[0].title}\n + ${songs.length} more song(s)  have been added to the queue.`));
+		interaction.followUp((`${songs[0].name}\n + ${songs.length - 1} more song(s)  have been added to the queue.`));
 	}
 }

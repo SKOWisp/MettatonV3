@@ -3,7 +3,7 @@ import URLParse from 'url-parse';
 import ytpl from 'ytpl';
 import ytdl from 'ytdl-core';
 import { safeSong } from '../voice/safeSong';
-import { SongData } from '../voice/SongData';
+import { SongData } from '..';
 import { ytHostnames, spotifyHostnames, validatorOpts } from './hostnames';
 import { matches, shuffle } from './utils';
 
@@ -52,17 +52,8 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 	if (pathname === '/watch') {
 		const song: SongData[] | string = await ytdl.getBasicInfo(query)
 			.then(data => {
-				// Return song data object
-				const video = data.videoDetails;
 
-				return [new SongData(
-					video.title,
-					video.video_url,
-					video.author.name,
-					video.author.user_url ?? null,
-					(video.author.thumbnails) ? video.author.thumbnails[0].url : null,
-					video.thumbnails[0].url,
-				)];
+				return [new SongData(data, 'ytdl')];
 			})
 			.catch((err) => {
 				console.warn(err);
@@ -75,15 +66,7 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 			.then(data => {
 				const songs: SongData[] = data.items.map(video => {
 					// Return song data object per item
-
-					return new SongData(
-						video.title,
-						video.url,
-						video.author.name,
-						video.author.url,
-						data.author.bestAvatar.url,
-						video.thumbnails[video.thumbnails.length - 1].url,
-					);
+					return new SongData(video, 'ytpl');
 				});
 				return songs;
 			})
@@ -113,35 +96,23 @@ async function spotifyUrl(query: string): Promise<SongData[] | string> {
 	const result: SongData[] | string = await getData(query).then((data: any) => {
 		if (data.type === 'track') {
 			// Only able to get title and artist
-			return [new SongData(
-				data.title + ' by ' + data.artists[0].name,
-				null,
-				null,
-				null,
-				null,
-				null,
-			)];
+			const artists = ' by ' + data.artists.map((a: any) => a.name).join(' ');
+
+			return [new SongData(data.title + artists, 'spotify')];
 		}
 		else {
 			const songs: SongData[] = data.trackList.map((track: any) => {
 				// Return song data object per track
 				// Only take first artist name
-				return new SongData(
-					track.title + ' by ' + track.subtitle.split(',')[0],
-					null,
-					null,
-					null,
-					null,
-					null,
-				);
+				return new SongData(track.title + ' by ' + track.subtitle, 'spotify');
 			});
 			return shuffle(songs);
 		}
 	}).catch((err : any) => {
 		console.warn(err);
 		return `spotify-url-info (what allows me to retrieve info from spotify) 
-is giving me headaches, try again later. \n
-P.S. I can't read info from private stuff!!!'`;
+				is giving me headaches, try again later. \n
+				P.S. I can't read info from private stuff!!!'`;
 	});
 
 	return result;

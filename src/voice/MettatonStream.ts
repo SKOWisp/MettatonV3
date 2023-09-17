@@ -3,7 +3,7 @@ import {
 } from '@discordjs/voice';
 import ytdl from 'ytdl-core';
 import { FFmpeg } from 'prism-media';
-
+import { SongData } from '.';
 interface StreamOptions {
 	seek?: number;
 	ffmpegArgs?: string[];
@@ -30,22 +30,25 @@ export class MettatonStream {
 	 * @private
 	 */
 	static async YouTube(url: string): Promise<MettatonStream> {
-		const formats: ytdl.videoFormat[] | void = await ytdl.getInfo(url)
+		const video: ytdl.videoInfo | void = await ytdl.getInfo(url)
 			.then((data) => {
-				return data.formats;
+				return data;
 			})
 			.catch((error: Error) => { throw error; });
 
-		if (!formats || !formats.length) throw new Error('This video is unavailable.');
-		const bestFormat = chooseBestVideoFormat(formats!);
+		const formats = video.formats;
+
+		if (!video || !formats.length) throw new Error('This video is unavailable.');
+		const bestFormat = chooseBestVideoFormat(formats);
 		if (!bestFormat) throw new Error('Unplayable formats.');
 
-		return new MettatonStream(bestFormat.url);
+		return new MettatonStream(bestFormat.url, video);
 	}
 
 	type: StreamType = StreamType.OggOpus;
 	stream: FFmpeg;
 	url: string;
+	songdata: SongData;
 
 	/**
      * Create a MettatonStream to play with {@link }
@@ -53,12 +56,13 @@ export class MettatonStream {
      * @param {StreamOptions} options Stream options
      * @private
 	 */
-	private constructor(url: string) {
+	private constructor(url: string, data: ytdl.videoInfo) {
 		/**
 		 * Stream URL
 		 * @type {string}
 		 */
 		this.url = url;
+		this.songdata = new SongData(data, 'ytdl');
 
 		const args = [
 			// Reconnect flags. Pray at least one works

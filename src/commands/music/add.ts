@@ -53,7 +53,7 @@ module.exports = {
 			serverQueue.queue.unshift(song);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
-			return interaction.followUp(`${song.title} is now next in the queue.`);
+			return interaction.followUp(`${song.name} is now next in the queue.`);
 		}
 
 		// Parse query as a URL for convenience
@@ -74,7 +74,7 @@ module.exports = {
 			serverQueue.queue.unshift(song[0]);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
-			return interaction.followUp(`${song[0].title} is now next in the queue.`);
+			return interaction.followUp(`${song[0].name} is now next in the queue.`);
 		}
 
 		// Query is a spotify link
@@ -85,7 +85,7 @@ module.exports = {
 			serverQueue.queue.unshift(song[0]);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
-			return interaction.followUp(`${song[0].title} is now next in the queue.`);
+			return interaction.followUp(`${song[0].name} is now next in the queue.`);
 		}
 
 		return interaction.followUp('Something went terribly wrong');

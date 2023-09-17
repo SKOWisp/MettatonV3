@@ -1,5 +1,5 @@
 import ytsr from 'ytsr';
-import { SongData } from './SongData';
+import { SongData } from '.';
 import 'dotenv/config';
 
 const searchLimit = Number(process.env.SEARCH_LIMIT);
@@ -45,12 +45,5 @@ export async function safeSong(query: string): Promise<SongData | null> {
 	const ytVideo = (ytItem! as ytsr.Video);
 	console.log('Found: ' + ytVideo.title);
 
-	return new SongData(
-		ytVideo.title,
-		ytVideo.url,
-		ytVideo.author?.name ?? null,
-		ytVideo.author?.url ?? null,
-		ytVideo.author?.bestAvatar?.url ?? null,
-		ytVideo.thumbnails[1] ? ytVideo.thumbnails[1].url : ytVideo.bestThumbnail.url,
-	);
+	return new SongData(ytVideo, 'ytsr');
 }
