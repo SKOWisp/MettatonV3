@@ -52,8 +52,8 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 	if (pathname === '/watch') {
 		const song: SongData[] | string = await ytdl.getBasicInfo(query)
 			.then(data => {
-
-				return [new SongData(data, 'ytdl')];
+				const vid = data.videoDetails;
+				return [new SongData({ name: vid.title, urlYT: vid.video_url }, 'youtube')];
 			})
 			.catch((err) => {
 				console.warn(err);
@@ -66,7 +66,7 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 			.then(data => {
 				const songs: SongData[] = data.items.map(video => {
 					// Return song data object per item
-					return new SongData(video, 'ytpl');
+					return new SongData({ name: video.title, urlYT: video.shortUrl }, 'youtube');
 				});
 				return songs;
 			})
