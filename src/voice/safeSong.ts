@@ -42,8 +42,8 @@ export async function safeSong(query: string): Promise<SongData | null> {
 		return null;
 	}
 
-	const ytVideo = (ytItem! as ytsr.Video);
-	console.log('Found: ' + ytVideo.title);
+	const vid = (ytItem! as ytsr.Video);
+	console.log('Found: ' + vid.title);
 
-	return new SongData(ytVideo, 'ytsr');
+	return new SongData({ name: vid.title, urlYT: vid.url }, 'youtube');
 }
