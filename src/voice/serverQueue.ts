@@ -95,7 +95,7 @@ export class ServerQueue {
 				}
 				catch {
 					// Destroys voice connection if stuck in the Signalling or Connecting states
-					this.voiceConnection.destroy();
+					this.eraseQueue();
 				}
 			}
 		});
