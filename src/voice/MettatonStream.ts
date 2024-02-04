@@ -21,7 +21,7 @@ export const chooseBestVideoFormat = (formats: ytdl.videoFormat[], isLive = fals
 };
 
 
-// Shamelesly copied from https://distube.js.org
+// Shamelessly copied from https://distube.js.org
 export class MettatonStream {
 	/**
 	 * Create a stream from yt url
