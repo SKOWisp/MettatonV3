@@ -13,7 +13,7 @@ import { TextBasedChannel, Message } from 'discord.js';
 import { promisify } from 'util';
 import 'dotenv/config';
 import { MettatonStream, SongData, safeSong } from '.';
-import { createPlayMessage } from '..';
+import { MettatonMessage } from '..';
 
 const wait = promisify(setTimeout);
 
@@ -122,7 +122,7 @@ export class ServerQueue {
 				this.currentSong_ = newResource.metadata;
 				console.log(`Now playing: ${newResource.metadata.name}`);
 
-				const pMessage = await createPlayMessage(newResource.metadata);
+				const pMessage = await MettatonMessage.createPlayMessage(newResource.metadata);
 				this.playMessage = await this.textChannel.send(pMessage).catch(console.warn);
 			}
 		});

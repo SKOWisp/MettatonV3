@@ -1,6 +1,7 @@
 import { Client, Collection, GatewayIntentBits } from 'discord.js';
 import { LooseClient } from './LooseClient';
 import { ServerQueue } from './voice/serverQueue';
+import { MettatonMessage } from '.';
 import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -59,5 +60,9 @@ for (const file of eventFiles) {
 		lClient.on(event.name, (...args) => event.execute(...args));
 	}
 }
+
+// Loading emojis
+const settingsPath = path.resolve(__dirname, '..');
+MettatonMessage.LoadEmojis(path.join(settingsPath, 'emojis.txt'));
 
 void lClient.login(process.env.BOT_TOKEN);

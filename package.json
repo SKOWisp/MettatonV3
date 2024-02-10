@@ -1,6 +1,6 @@
 {
   "name": "mettatonv3",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Hopefully a better version of the Mettaton Discord bot.",
   "main": "src/Bot.ts",
   "scripts": {
