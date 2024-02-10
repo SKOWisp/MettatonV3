@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
+import { splitString } from '../..';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -10,7 +11,7 @@ module.exports = {
 				.setDescription('all/anim/static')
 				.setRequired(false)),
 
-	async execute(interaction: LooseCommandInteraction) {
+	execute(interaction: LooseCommandInteraction) {
 		const guild = interaction.guild!;
 
 		// Get flags
@@ -45,12 +46,21 @@ module.exports = {
 			info[1] += visibleEmoji + '\n';
 		}
 
-		let text = `**${guild.name}'s emojis: ** \n` + info[0];
-		if (showIDs) {
-			text += '\n ** IDs: ** \n' + '```' + info[1] + '```';
+
+		const firstMessages = splitString(info[0]);
+		// Reply
+		interaction.reply(`**${guild.name}'s emojis: **`);
+		for (const msg of firstMessages) {
+			interaction.channel!.send(msg);
 		}
 
-		// Reply
-		interaction.reply({ content: text, ephemeral: true });
+		if (showIDs) {
+			// eslint-disable-next-line no-useless-escape
+			const secondMessages = splitString(info[1], { prepend: '\`\`\`\n', append: '\n\`\`\`' });
+			interaction.channel!.send('** IDs: **');
+			for (const msg of secondMessages) {
+				interaction.channel!.send(msg);
+			}
+		}
 	},
 };
