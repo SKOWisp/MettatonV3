@@ -30,6 +30,7 @@
 		"node_modules",
 		"dist",
 		"test",
-		"src/Deploy-Commands.ts"
+		"src/DeployCommands.ts",
+		"src/DataBaseInit.ts"
 	]
 } 

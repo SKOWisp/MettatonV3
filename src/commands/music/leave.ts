@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, GuildMember } from 'discord.js';
-import { LooseCommandInteraction } from '../../LooseClient';
+import { LooseCommandInteraction } from '../..';
 
 module.exports = {
 	data: new SlashCommandBuilder()

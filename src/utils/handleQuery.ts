@@ -1,11 +1,17 @@
+import {
+	SongData,
+	safeSong,
+	ytHostnames,
+	spotifyHostnames,
+	validatorOpts,
+} from '..';
+
+import { matches, shuffle } from './utils';
+
 import validator from 'validator';
 import URLParse from 'url-parse';
 import ytpl from 'ytpl';
 import ytdl from 'ytdl-core';
-import { safeSong } from '../voice/safeSong';
-import { SongData } from '..';
-import { ytHostnames, spotifyHostnames, validatorOpts } from './hostnames';
-import { matches, shuffle } from './utils';
 
 // spotify-url-info modules
 const fetch = require('isomorphic-unfetch');

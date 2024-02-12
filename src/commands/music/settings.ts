@@ -3,13 +3,21 @@ import { LooseCommandInteraction } from '../..';
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('remove')
+		.setName('settings')
 		.setDescription('Removes a song from the /queue.')
-		.addIntegerOption(option =>
-			option.setName('position')
+		.addBooleanOption(option =>
+			option.setName('shuffle')
 				.setDescription('Queue position of the song to remove.')
-				.setRequired(true)),
+				.setRequired(false)),
 	async execute(interaction: LooseCommandInteraction) {
+
+		const guildId = interaction.guildId!;
+		const settings = interaction.client.guildSettings.get(guildId);
+
+		if (settings) {
+			// Display information
+			return interaction.reply({ content: `Shuffle ${settings.voiceSettings}. (?)`, ephemeral: true });
+		}
 
 		const channel = (interaction.member as GuildMember).voice.channel;
 		const serverQueue = interaction.client.queues.get(interaction.guildId!);
@@ -18,7 +26,7 @@ module.exports = {
 		if (!serverQueue) return interaction.reply({ content: `There is nothing playing on ${interaction.guild!.name}. (?)`, ephemeral: true });
 
 		if (!channel || channel.id !== serverQueue.voiceConnection.joinConfig.channelId) {
-			return interaction.reply({ content: 'Join the voice channel first!.', ephemeral: true });
+			
 		}
 
 		/*

@@ -1,11 +1,9 @@
 import ytdl from 'ytdl-core';
 
-
 interface BasicYTData {
 	name: string;
 	urlYT: string;
 }
-
 
 export class SongData {
 	// The only real requirement is a string that can be looked-up later

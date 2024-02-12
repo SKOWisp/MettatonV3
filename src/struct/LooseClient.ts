@@ -1,9 +1,10 @@
 import { Client, Collection, CommandInteraction } from 'discord.js';
-import { ServerQueue } from './voice/serverQueue';
+import { ServerQueue, GuildSettings } from '..';
 
 export interface LooseClient extends Client {
     commands: Collection<string, any>,
-    queues: Collection<string, ServerQueue>
+    queues: Collection<string, ServerQueue>,
+    guildSettings: Collection<string, GuildSettings>,
 }
 
 /**

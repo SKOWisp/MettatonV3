@@ -1,2 +1,3 @@
 export { MettatonMessage } from './MettatonMessage';
-export { shuffle, matches, splitString } from './utils';
+export * from './utils';
+export * from './handleQuery';

@@ -1,11 +1,12 @@
 {
   "name": "mettatonv3",
-  "version": "1.0.9",
+  "version": "2.0.0",
   "description": "Hopefully a better version of the Mettaton Discord bot.",
   "main": "src/Bot.ts",
   "scripts": {
     "start": "ts-node src/Bot.ts",
-    "deploy": "ts-node src/Deploy-Commands.ts",
+    "deploy": "ts-node src/DeployCommands.ts",
+    "database": "ts-node src/DataBaseInit.ts -f",
     "undeploy": "ts-node test/Delete-Commands.ts",
     "lint": "eslint --fix --ext .ts .",
     "build": "tsc"
@@ -22,7 +23,9 @@
     "isomorphic-unfetch": "^4.0.2",
     "libsodium-wrappers": "^0.7.11",
     "prism-media": "^1.3.5",
+    "sequelize": "^6.37.0",
     "spotify-url-info": "^3.2.6",
+    "sqlite3": "^5.1.7",
     "url-parse": "^1.5.10",
     "validator": "^13.11.0",
     "ytdl-core": "git+ssh://git@github.com:khlevon/node-ytdl-core.git#v4.11.4-patch.2",

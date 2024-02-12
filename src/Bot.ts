@@ -1,7 +1,8 @@
 import { Client, Collection, GatewayIntentBits } from 'discord.js';
-import { LooseClient } from './LooseClient';
-import { ServerQueue } from './voice/serverQueue';
-import { MettatonMessage } from '.';
+import { MettatonMessage, LooseClient, ServerQueue } from '.';
+
+import { GuildSettings } from './DataBaseObjects';
+
 import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,12 +18,12 @@ const client = new Client({
 	],
 });
 
-// Adds commands property to existing client object
+// Adds properties to existing client object
 const lClient: LooseClient = Object.assign(client, client, {
 	commands: new Collection<string, any>(),
 	queues: new Collection<string, ServerQueue>(),
+	guildSettings: new Collection<string, typeof GuildSettings>(),
 });
-
 
 // Loading commands from the command folder, and each subfolder
 const foldersPath = path.join(__dirname, 'commands');

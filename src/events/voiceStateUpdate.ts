@@ -1,11 +1,12 @@
 import { Collection, Events, GuildMember, VoiceState } from 'discord.js';
-import { LooseClient } from '../LooseClient';
+import { ServerQueue, LooseClient } from '..';
 import 'dotenv/config';
-import { ServerQueue } from '../voice/serverQueue';
+
 
 module.exports = {
 	name: Events.VoiceStateUpdate,
 	once: false,
+	// eslint-disable-next-line no-unused-vars
 	async execute(oldState: VoiceState, _: VoiceState) {
 		/**
 		 * Auto-disconnects bot from voice channel when no members present
@@ -34,11 +35,12 @@ module.exports = {
 
 		if (!users) {
 			// Initiate auto-disconnect countdown if no users in channel
-			console.log('Auto-disconnect countdown started');
+			const millis = 1_000 * Number(process.env.TOLERANCE);
+			console.log(`Bot will autodisconnect in ${millis / 1_000} second(s)`);
 
 			serverQueue.timeoutID = setTimeout(
 				disconnectBot,
-				1000 * 60 * Number(process.env.TOLERANCE),
+				millis,
 				serverQueue, client.queues);
 		}
 		else if (serverQueue.timeoutID) {

@@ -1,10 +1,16 @@
 import { SlashCommandBuilder, GuildMember } from 'discord.js';
+import {
+	LooseCommandInteraction,
+	ytHostnames,
+	spotifyHostnames,
+	validatorOpts,
+	safeSong,
+	matches,
+	ytUrl,
+	spotifyUrl,
+} from '../..';
+
 import validator from 'validator';
-import { LooseCommandInteraction } from '../../LooseClient';
-import { ytHostnames, spotifyHostnames, validatorOpts } from '../../utils/hostnames';
-import { safeSong } from '../../voice/safeSong';
-import { matches } from '../../utils/utils';
-import { ytUrl, spotifyUrl } from '../../utils/handleQuery';
 import URLParse from 'url-parse';
 
 module.exports = {

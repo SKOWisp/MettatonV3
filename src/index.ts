@@ -1,3 +1,4 @@
 export * from './voice';
 export * from './utils';
-export { LooseCommandInteraction } from './LooseClient';
+export * from './struct';
+export * from './models';

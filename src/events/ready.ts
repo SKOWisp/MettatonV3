@@ -1,5 +1,5 @@
 import { ActivityType, Events } from 'discord.js';
-import { LooseClient } from '../LooseClient';
+import { LooseClient } from '..';
 
 module.exports = {
 	name: Events.ClientReady,
@@ -9,6 +9,7 @@ module.exports = {
 			return;
 		}
 		console.log(`Ready! Logged in as ${client.user.tag}`);
+		console.log(client.guilds.cache);
 		client.user.setActivity('/play', { type: ActivityType.Listening });
 	},
 };
