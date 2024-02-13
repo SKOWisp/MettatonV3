@@ -1,68 +1,109 @@
-import { GuildMember, SlashCommandBuilder } from 'discord.js';
-import { LooseCommandInteraction } from '../..';
+import { ChatInputCommandInteraction, SlashCommandBuilder, CacheType } from 'discord.js';
+import { FilterSettings, LooseCommandInteraction, VoiceSettings } from '../..';
+import { GuildSettings, MettatonMessage } from '../..';
+
+import 'dotenv/config';
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('settings')
-		.setDescription('Removes a song from the /queue.')
-		.addBooleanOption(option =>
-			option.setName('shuffle')
-				.setDescription('Queue position of the song to remove.')
-				.setRequired(false)),
-	async execute(interaction: LooseCommandInteraction) {
+		.setDescription('List or modify Mettaton server settings.')
+		.addSubcommand(subcommand => subcommand
+			.setName('voice')
+			.setDescription('Modify voice settings.')
 
-		const guildId = interaction.guildId!;
-		const settings = interaction.client.guildSettings.get(guildId);
+			.addBooleanOption(option => option
+				.setName('shuffle')
+				.setDescription('Whether to pre-shuffle songs added from playlists.')
+				.setRequired(false))
+			.addIntegerOption(option => option
+				.setName('max_songs')
+				.setDescription('Max number of songs that the queue can have.')
+				.setMaxValue(Number(process.env.MAX_SONGS))
+				.setMinValue(10)
+				.setRequired(false))
+			.addIntegerOption(option => option
+				.setName('dc_tolerance')
+				.setDescription('Seconds of tolerance before auto-disconnecting.')
+				.setMaxValue(Number(process.env.TOLERANCE))
+				.setMinValue(5)
+				.setRequired(false)))
 
-		if (settings) {
-			// Display information
-			return interaction.reply({ content: `Shuffle ${settings.voiceSettings}. (?)`, ephemeral: true });
+		.addSubcommand(subcommand => subcommand
+			.setName('filter')
+			.setDescription('Modify filter settings.')
+			.addBooleanOption(option => option
+				.setName('uwu')
+				.setDescription('Whether to filter uwu or not.')
+				.setRequired(false))
+			.addBooleanOption(option => option
+				.setName('nya')
+				.setDescription('Whether to filter nya or not.')
+				.setRequired(false)))
+
+		.addSubcommand(subcommand => subcommand
+			.setName('show')
+			.setDescription('Shows server settings.')),
+
+	async execute(i: LooseCommandInteraction & ChatInputCommandInteraction<CacheType>) {
+		// This may take a while to execute on a Pi
+		await i.deferReply();
+
+		// Get settings
+		const guildId = i.guildId!;
+		let settings = i.client.guildSettings.get(guildId);
+		let changed: boolean = false;
+
+		// Create new db entry and save in memory if none found
+		if (!settings) {
+			console.log(`New guild settings added: ${guildId}`);
+			const newSettings = await GuildSettings.create({ guild_id: guildId });
+			i.client.guildSettings.set(guildId, newSettings);
+			settings = newSettings;
 		}
 
-		const channel = (interaction.member as GuildMember).voice.channel;
-		const serverQueue = interaction.client.queues.get(interaction.guildId!);
+		if (i.options.getSubcommand() === 'voice') {
+			const prevVoice = settings.voice;
 
-		// Return if there is no severQueue object
-		if (!serverQueue) return interaction.reply({ content: `There is nothing playing on ${interaction.guild!.name}. (?)`, ephemeral: true });
+			// Create new VoiceSettings object
+			// Keeps unmodified values
+			const newVoice: VoiceSettings = {
+				shuffle: i.options.getBoolean('shuffle') ?? prevVoice.shuffle,
+				maxSongs: (i.options as any).getInteger('max_songs') ?? prevVoice.maxSongs,
+				disconnectTimeout: (i.options as any).getInteger('dc_tolerance') ?? prevVoice.disconnectTimeout,
+			};
 
-		if (!channel || channel.id !== serverQueue.voiceConnection.joinConfig.channelId) {
-			
-		}
+			// Check if there were any changes
+			if (JSON.stringify(newVoice) !== JSON.stringify(prevVoice)) {
+				settings.voice = newVoice;
+				await settings.save().catch(e => console.log(e));
 
-		/*
-			Parse position
-			reject negative values and 0
-		*/
-		let pos: number = (interaction.options as any).getInteger('position');
-		pos = ((Number.isNaN(pos) || pos === 0) ? 1 : pos);
-		pos = (pos < 0 ? Math.abs(pos) : pos);
-
-		const queueLength = serverQueue.queue.length;
-
-		// Do nothing if there's nothing to do
-		if (pos - 1 > queueLength) {
-			await interaction.reply({ content: 'https://media1.tenor.com/m/TFFBKrvBc_sAAAAd/zoku-owarimonogatari-serpent.gif' });
-			return interaction.channel!.send('*\\*zzZZZzzz...\\** (nadeko doesn\'t have anything to remove)');
-		}
-
-		// Stop current song if pos is 1
-		// Leave channel if no songs left
-		if (pos === 1) {
-			serverQueue.audioPlayer.stop();
-
-			if (queueLength === 0) {
-				serverQueue.eraseQueue();
-				interaction.client.queues.delete(interaction.guildId!);
+				console.log('New VoiceSettings saved:', settings.dataValues.voice);
+				changed = true;
 			}
+		}
+		else if (i.options.getSubcommand() === 'filter') {
+			const prevFilter = settings.filter;
 
-			await interaction.reply({ content: 'https://media1.tenor.com/m/dRpsv_G8zHwAAAAC/monogatari-monogatari-series.gif' });
-			return interaction.channel!.send('use /skip dummy...');
+			const newFilter: FilterSettings = {
+				uwu: i.options.getBoolean('uwu') ?? prevFilter.uwu,
+				nya: (i.options as any).getInteger('nya') ?? prevFilter.nya,
+			};
+
+			if (JSON.stringify(newFilter) !== JSON.stringify(prevFilter)) {
+				settings.filter = newFilter;
+				await settings.save().catch(e => console.log(e));
+
+				console.log('New FilterSettings saved:', settings.dataValues.filter);
+				changed = true;
+			}
 		}
 
-		// Remove song in /queue
-		const songName = serverQueue.queue[pos - 2].name;
-		serverQueue.queue.splice(pos - 2, 1);
+		// Show settings
+		const emoji = MettatonMessage.randomEmoji();
+		const content = emoji + `  ***${changed ? 'New' : 'Current'}*** Settings:  ` + emoji;
+		const embeds = MettatonMessage.createSettingsEmbeds(settings, i.guild!);
 
-		return interaction.reply({ content: `Removed song #${pos}: ${songName}.` });
+		return i.followUp({ content, embeds });
 	},
 };

@@ -51,9 +51,9 @@ export class MettatonStream {
 	songdata: SongData;
 
 	/**
-     * Create a MettatonStream to play with {@link }
-     * @param {string} url Stream URL
-     * @param {StreamOptions} options Stream options
+     * Create a MettatonStream to play with {@link FFmpeg}
+     * @param {string} url Stream URL.
+     * @param {StreamOptions} data Video metadata.
      * @private
 	 */
 	private constructor(url: string, data: ytdl.videoInfo) {

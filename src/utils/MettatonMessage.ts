@@ -1,6 +1,6 @@
-﻿import { BaseMessageOptions, Embed } from 'discord.js';
+﻿import { BaseMessageOptions, Embed, Guild } from 'discord.js';
 import { getAverageColor } from 'fast-average-color-node';
-import { SongData } from '..';
+import { IGuildSettings, SongData } from '..';
 import fs from 'node:fs';
 
 export class MettatonMessage {
@@ -20,6 +20,14 @@ export class MettatonMessage {
 		if (!data) return;
 
 		this.playEmojis = data.split('\n').map(item => item.trim());
+	}
+
+	/**
+	 * Returns a random emoji string from the loaded emojis file.
+	 * @returns {string}
+	 */
+	static randomEmoji(): string {
+		return this.playEmojis[Math.floor((Math.random() * this.playEmojis.length))];
 	}
 
 	/**
@@ -53,7 +61,7 @@ export class MettatonMessage {
 		/*
 		 * Add random emoji to the message
 		 */
-		const emoji = this.playEmojis[Math.floor((Math.random() * this.playEmojis.length))];
+		const emoji = this.randomEmoji();
 		const content = emoji + ' ** Now playing: ** ' + emoji;
 
 
@@ -90,5 +98,42 @@ export class MettatonMessage {
 		embeds = [embeds as Embed];
 
 		return { content, embeds };
+	}
+
+	/**
+	 * Creates the settings embeds
+	 * @param {IGuildSettings} settings The guild settings.
+	 * @param {Guild} guild Guild object to get data from.
+	 * @returns {Embed[]}
+	 */
+	static createSettingsEmbeds(settings: IGuildSettings, guild: Guild): Embed[] {
+		// Settings embed
+		let embeds: any = {
+			color: 0,
+			author: {
+				name: `${guild.name}`,
+				iconURL: `${guild.iconURL()}`,
+				url: '',
+			},
+			description: '`Mettaton Settings`',
+			fields: [
+				{
+					'name': '** Voice **',
+					'value': `* shuffle: ${settings.voice.shuffle}\n` +
+						`* maxSongs: ${settings.voice.maxSongs}\n` +
+						`* disconnectTimeout: ${settings.voice.disconnectTimeout}`,
+					'inline': true,
+				},
+				{
+					'name': '** Filters **',
+					'value': `* uwu: ${settings.filter.uwu}\n` +
+						`* nya: ${settings.filter.nya}`,
+					'inline': true,
+				},
+			],
+		};
+
+		embeds = [embeds as Embed];
+		return embeds;
 	}
 }

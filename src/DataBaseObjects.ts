@@ -1,5 +1,5 @@
-import { Sequelize } from 'sequelize';
-import { GuildSettings as IGuildSettings } from '.';
+import { Sequelize, ModelStatic } from 'sequelize';
+import { IGuildSettings, VoiceSettings, FilterSettings } from '.';
 
 const sequelize = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
@@ -9,34 +9,31 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 // Load models
-const extension = __filename.split('.').pop();
-const GuildSettings: IGuildSettings = require('./models/GuildSettings' + extension)(sequelize);
-
+const extension = __filename.split(/(.)/g).pop();
+const GuildSettings: ModelStatic<IGuildSettings> = require('./models/GuildSettings' + extension)(sequelize);
 
 /*
-Reflect.defineProperty(GuildSettings.prototype, 'setSettings', {
-	value: async item => {
-		const userItem = await UserItems.findOne({
-			where: { user_id: this.user_id, item_id: item.id },
-		});
-
-		if (userItem) {
-			userItem.amount += 1;
-			return userItem.save();
-		}
-
-		return GuildSettings.create({ user_id: this.user_id, item_id: item.id, amount: 1 });
-	},
-});
-
-Reflect.defineProperty(GuildSettings.prototype, 'readSettings', {
-	value: () => {
-		return UserItems.findAll({
-			where: { user_id: this.user_id },
-			include: ['item'],
-		});
-	},
-});
+	We 'objectify' the db data.
+	To modify the nested properties you have pass a complete VoiceSettings/FilterSettings object
 */
+Object.defineProperties(GuildSettings.prototype,
+	{
+		'voice': {
+			get: function() {
+				return JSON.parse(this.getDataValue('voice'));
+			},
+			set: function(newVal: VoiceSettings) {
+				this.setDataValue('voice', JSON.stringify(newVal));
+			},
+		},
+		'filter': {
+			get: function() {
+				return JSON.parse(this.getDataValue('filter'));
+			},
+			set: function(newVal: FilterSettings) {
+				this.setDataValue('filter', JSON.stringify(newVal));
+			},
+		},
+	});
 
 export { GuildSettings };

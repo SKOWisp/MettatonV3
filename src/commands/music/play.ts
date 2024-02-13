@@ -4,9 +4,7 @@ import {
 	VoiceConnectionStatus,
 } from '@discordjs/voice';
 import { SlashCommandBuilder, GuildMember } from 'discord.js';
-import { SongData, ServerQueue, LooseCommandInteraction } from '../..';
-
-import { handleQuery } from '../../utils/handleQuery';
+import { SongData, ServerQueue, LooseCommandInteraction, handleQuery } from '../..';
 
 module.exports = {
 	data: new SlashCommandBuilder()

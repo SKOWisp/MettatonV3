@@ -1,27 +1,30 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import {
+	Sequelize,
+	DataTypes,
+	Model,
+	InferAttributes,
+	InferCreationAttributes,
+	CreationOptional,
+} from 'sequelize';
+
 
 /**
- * TODO
+ * Guild Voice Settings
  * @typedef {Object} VoiceSettings
- * @prop {boolean} [settings.shuffle=true] Whether to shuffle added playlists
- * @prop {number} [settings.maxSongs=150] Skip the playing song (if exists) and play the added playlist instantly
- * @prop {number} [settings.autodisconnectTolerance=180] Position of the song/playlist to add to the queue,
- * <= 0 to add to the end of the queue.
+ * @prop {boolean} shuffle Whether to shuffle added playlists.
+ * @prop {number} maxSongs The maximum number of songs that can be added to the queue.
+ * @prop {number} disconnectTimeout Time in seconds the bot will remain in an empty voice channel
  */
-type VoiceSettings = {
-	shuffle: boolean,
-	maxSongs: number,
-	disconnectTimeout: number,
+export type VoiceSettings = {
+	readonly shuffle: boolean,
+	readonly maxSongs: number,
+	readonly disconnectTimeout: number,
 }
 
-type FilterSettings = {
-	nya: boolean,
-	uwu: boolean,
+export type FilterSettings = {
+	readonly nya: boolean,
+	readonly uwu: boolean,
 
-}
-export type GuildSettings = {
-	voiceSettings?: VoiceSettings,
-	FilterSettings?: FilterSettings
 }
 
 // Default settings
@@ -35,9 +38,15 @@ const defaultFilter: FilterSettings = {
 	uwu: true,
 };
 
+export interface IGuildSettings extends Model<InferAttributes<IGuildSettings>, InferCreationAttributes<IGuildSettings>> {
+	// Some fields are optional when calling UserModel.create() or UserModel.build()
+	guild_id: string;
+	voice: CreationOptional<VoiceSettings>;
+	filter: CreationOptional<FilterSettings>;
+}
 
 module.exports = (sequelize: Sequelize) => {
-	return (sequelize.define('guild_settings', {
+	return (sequelize.define<IGuildSettings>('GuildSettings', {
 		guild_id: {
 			type: DataTypes.STRING,
 			// Value must be unique and can't be null

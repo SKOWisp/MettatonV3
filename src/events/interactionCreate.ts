@@ -8,7 +8,6 @@ module.exports = {
 		 * As the name implies, executes slash commands when a
 		 * InteractionCreate event occurs.
 		 */
-
 		if (!interaction.isChatInputCommand() || !(interaction.member instanceof GuildMember)) return;
 
 		const command = interaction.client.commands.get(interaction.commandName);
