@@ -39,12 +39,7 @@ module.exports = {
 			return interaction.channel!.send('why add songs only to skip them?!!?!');
 		}
 
-		// Slice queue if necessary
-		if (skips > 1) {
-			const newArray = serverQueue.queue.slice(skips - 1);
-			serverQueue.queue = newArray;
-		}
-		serverQueue.audioPlayer.stop();
+		serverQueue.skip(skips);
 		return interaction.reply({ content: `Skipping ${skips ?? 1} song(s)` });
 	},
 };

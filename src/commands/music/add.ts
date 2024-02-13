@@ -40,6 +40,10 @@ module.exports = {
 			return interaction.followUp({ content: 'Join the voice channel first!.', ephemeral: true });
 		}
 
+		if (serverQueue.isFull()) {
+			return interaction.followUp('The server\'s song queue is full! Skip or remove songs before adding more.');
+		}
+
 		/*
 			Adding song to the beginning of the queue
 		*/
@@ -56,7 +60,7 @@ module.exports = {
 			const song = await safeSong(query);
 			if (!song) return interaction.followUp('ytsr (looking up your query in yt) is giving me headaches, try again in a sec.');
 
-			serverQueue.queue.unshift(song);
+			serverQueue.enqueue([song], true);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
 			return interaction.followUp(`${song.name} is now next in the queue.`);
@@ -77,7 +81,7 @@ module.exports = {
 			const song = await ytUrl(query);
 			if (typeof song === 'string') return interaction.followUp(song);
 
-			serverQueue.queue.unshift(song[0]);
+			serverQueue.enqueue(song, true);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
 			return interaction.followUp(`${song[0].name} is now next in the queue.`);
@@ -88,7 +92,7 @@ module.exports = {
 			const song = await spotifyUrl(query);
 			if (typeof song === 'string') return interaction.followUp(song);
 
-			serverQueue.queue.unshift(song[0]);
+			serverQueue.enqueue(song, true);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
 			return interaction.followUp(`${song[0].name} is now next in the queue.`);

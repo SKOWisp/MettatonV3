@@ -49,18 +49,10 @@ module.exports = {
 		// This may take a while to execute on a Pi
 		await i.deferReply();
 
-		// Get settings
+		// Get settings can't be null because we check in interactionCreate.ts
 		const guildId = i.guildId!;
-		let settings = i.client.guildSettings.get(guildId);
+		const settings = i.client.guildSettings.get(guildId)!;
 		let changed: boolean = false;
-
-		// Create new db entry and save in memory if none found
-		if (!settings) {
-			console.log(`New guild settings added: ${guildId}`);
-			const newSettings = await GuildSettings.create({ guild_id: guildId });
-			i.client.guildSettings.set(guildId, newSettings);
-			settings = newSettings;
-		}
 
 		if (i.options.getSubcommand() === 'voice') {
 			const prevVoice = settings.voice;

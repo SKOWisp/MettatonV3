@@ -3,8 +3,8 @@ import {
 	joinVoiceChannel,
 	VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { SlashCommandBuilder, GuildMember } from 'discord.js';
-import { SongData, ServerQueue, LooseCommandInteraction, handleQuery } from '../..';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
+import { SongData, ServerQueue, LooseCommandInteraction, handleQuery, VoiceSettings } from '../..';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -14,11 +14,11 @@ module.exports = {
 			option.setName('song')
 				.setDescription('Query or url.')
 				.setRequired(true)),
-	async execute(interaction: LooseCommandInteraction) {
+	async execute(interaction: LooseCommandInteraction & ChatInputCommandInteraction<'cached'>) {
 		// This will take a while, so the reply is deferred
 		await interaction.deferReply();
 
-		const channel = (interaction.member as GuildMember).voice.channel;
+		const channel = interaction.member.voice.channel;
 
 		// Return if member isn't connected to voice
 		if (!channel) {
@@ -28,10 +28,23 @@ module.exports = {
 		// We'll be using this a bit
 		const client = interaction.client;
 		let serverQueue = client.queues.get(interaction.guildId!);
+		let settings: VoiceSettings;
 
+		// Get server settings
+		if (!serverQueue) {
+			/*
+				Settings can't be undefined because new servers create them when
+				interactionCreate gets called
+			*/
+			settings = interaction.client.guildSettings.get(interaction.guildId)!.voice;
+		}
+		else {
+			if (serverQueue.isFull()) return interaction.followUp('The server\'s song queue is full! Skip or remove songs before adding more.');
+			settings = serverQueue.voiceSettings;
+		}
 
-		// Dirty 'as any' cast, but we need it since the command hasn't been built.
-		const songs: SongData[] | string = await handleQuery((interaction.options as any).getString('song'));
+		// Dirty 'as any' cast, but we need it because discord.js typings are funky
+		const songs: SongData[] | string = await handleQuery((interaction.options as any).getString('song'), settings.shuffle);
 
 		// A lone string means handleQuery threw an error
 		if (typeof songs === 'string') {
@@ -40,12 +53,13 @@ module.exports = {
 
 		// If a serverQueue exists and is alive, we add the songs, otherwise it's reset
 		if (serverQueue && serverQueue.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
-			serverQueue.enqueue(songs);
-			return enqueueReply(interaction, songs);
+			const number = serverQueue.enqueue(songs);
+			return enqueueReply(interaction, songs, number);
 		}
 		else {
 			client.queues.delete(interaction.guildId!);
 		}
+
 
 		// Create a new server queue object otherwise
 		serverQueue = new ServerQueue(
@@ -56,12 +70,12 @@ module.exports = {
 				selfDeaf: true,
 			}),
 			interaction.channel!,
+			settings,
 		);
 
 
 		// Error event handling
 		serverQueue.voiceConnection.on('error', console.warn);
-
 		// serverQueue saved
 		client.queues.set(interaction.guildId!, serverQueue);
 
@@ -76,17 +90,17 @@ module.exports = {
 
 		// Enqueue the track(s) and reply a success message to the user
 		// Any errors will arise from playing the song, not from enqueueing it
-		serverQueue.enqueue(songs);
-		enqueueReply(interaction, songs);
+		const number = serverQueue.enqueue(songs);
+		enqueueReply(interaction, songs, number);
 	},
 };
 
 // Reply to the /play interaction depending on the amount of songs added.
-function enqueueReply(interaction: LooseCommandInteraction, songs: SongData[]) {
-	if (songs.length === 1) {
+function enqueueReply(interaction: LooseCommandInteraction, songs: SongData[], quantity: number) {
+	if (quantity === 1) {
 		interaction.followUp(`${songs[0].name} has been added to the queue.`);
 	}
 	else {
-		interaction.followUp((`${songs[0].name}\n + ${songs.length - 1} more song(s)  have been added to the queue.`));
+		interaction.followUp((`${songs[0].name}\n + ${quantity} more song(s)  have been added to the queue.`));
 	}
 }

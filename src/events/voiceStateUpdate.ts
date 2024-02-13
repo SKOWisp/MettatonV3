@@ -1,7 +1,5 @@
 import { Collection, Events, GuildMember, VoiceState } from 'discord.js';
 import { ServerQueue, LooseClient } from '..';
-import 'dotenv/config';
-
 
 module.exports = {
 	name: Events.VoiceStateUpdate,
@@ -35,7 +33,7 @@ module.exports = {
 
 		if (!users) {
 			// Initiate auto-disconnect countdown if no users in channel
-			const millis = 1_000 * Number(process.env.TOLERANCE);
+			const millis = 1_000 * serverQueue.voiceSettings.disconnectTimeout;
 			console.log(`Bot will autodisconnect in ${millis / 1_000} second(s)`);
 
 			serverQueue.timeoutID = setTimeout(

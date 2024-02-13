@@ -37,24 +37,21 @@ module.exports = {
 			return interaction.channel!.send('*\\*zzZZZzzz...\\** (nadeko doesn\'t have anything to remove)');
 		}
 
+		// Call the remove function and save the message
+
+		const info = serverQueue.remove(pos);
 		// Stop current song if pos is 1
 		// Leave channel if no songs left
 		if (pos === 1) {
-			serverQueue.audioPlayer.stop();
-
 			if (queueLength === 0) {
 				serverQueue.eraseQueue();
 				interaction.client.queues.delete(interaction.guildId!);
 			}
 
 			await interaction.reply({ content: 'https://media1.tenor.com/m/dRpsv_G8zHwAAAAC/monogatari-monogatari-series.gif' });
-			return interaction.channel!.send('use /skip dummy...');
+			return interaction.channel!.send(info);
 		}
 
-		// Remove song in /queue
-		const songName = serverQueue.queue[pos - 2].name;
-		serverQueue.queue.splice(pos - 2, 1);
-
-		return interaction.reply({ content: `Removed song #${pos}: ${songName}.` });
+		return interaction.reply({ content: `Removed song #${pos}: ${info}.` });
 	},
 };

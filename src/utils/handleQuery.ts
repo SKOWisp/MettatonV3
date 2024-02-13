@@ -6,7 +6,7 @@ import {
 	validatorOpts,
 } from '..';
 
-import { matches, shuffle } from './utils';
+import { matches, shuffle } from '.';
 
 import validator from 'validator';
 import URLParse from 'url-parse';
@@ -20,9 +20,10 @@ const { getData } = require('spotify-url-info')(fetch);
 /**
  * Processes a query into a SongData object or a string in case of error
  * @param query
+ * @param doShuffle Whether to pre-shuffle songs added from playlists
  * @returns
  */
-async function handleQuery(query: string): Promise<SongData[] | string> {
+async function handleQuery(query: string, doShuffle: boolean = true): Promise<SongData[] | string> {
 
 	console.log('Parsing: ' + query);
 
@@ -37,12 +38,12 @@ async function handleQuery(query: string): Promise<SongData[] | string> {
 
 	// For yt videos and playlists
 	if (matches(parsed.hostname, ytHostnames)) {
-		return await ytUrl(query);
+		return await ytUrl(query, doShuffle);
 	}
 
 	// For open.spotify.com links
 	if (matches(parsed.hostname, spotifyHostnames)) {
-		return await spotifyUrl(query);
+		return await spotifyUrl(query, doShuffle);
 	}
 
 	// Query is just a string
@@ -52,7 +53,7 @@ async function handleQuery(query: string): Promise<SongData[] | string> {
 }
 
 // Handles YouTube playlists and videos and returns a SongData[] object
-async function ytUrl(query: string): Promise<SongData[] | string> {
+async function ytUrl(query: string, doShuffle: boolean = true): Promise<SongData[] | string> {
 	const pathname = new URL(query).pathname;
 
 	if (pathname === '/watch') {
@@ -86,7 +87,7 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 			return tracks;
 		}
 		else {
-			return shuffle(tracks);
+			return (doShuffle ? shuffle(tracks) : tracks);
 		}
 	}
 	else {
@@ -95,7 +96,7 @@ async function ytUrl(query: string): Promise<SongData[] | string> {
 }
 
 // Handles Spotify tracks, albums, and playlits and returns a SongData[] object
-async function spotifyUrl(query: string): Promise<SongData[] | string> {
+async function spotifyUrl(query: string, doShuffle: boolean = true): Promise<SongData[] | string> {
 	// This one is a little different because the module works with:
 	// Albums, Tracks, Playlists & Artists
 
@@ -112,7 +113,8 @@ async function spotifyUrl(query: string): Promise<SongData[] | string> {
 				// Only take first artist name
 				return new SongData(track.title + ' by ' + track.subtitle, 'spotify');
 			});
-			return shuffle(songs);
+
+			return (doShuffle ? shuffle(songs) : songs);
 		}
 	}).catch((err : any) => {
 		console.warn(err);

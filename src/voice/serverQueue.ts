@@ -11,9 +11,8 @@
 } from '@discordjs/voice';
 import { TextBasedChannel, Message } from 'discord.js';
 import { promisify } from 'util';
-import 'dotenv/config';
 import { MettatonStream, SongData, safeSong } from '.';
-import { MettatonMessage } from '..';
+import { MettatonMessage, VoiceSettings } from '..';
 
 const wait = promisify(setTimeout);
 
@@ -24,13 +23,17 @@ export class ServerQueue {
 	public readonly voiceConnection: VoiceConnection;
 	public readonly textChannel: TextBasedChannel;
 	public readonly audioPlayer: AudioPlayer;
+	public readonly voiceSettings: VoiceSettings;
 	// eslint-disable-next-line no-undef
 	public timeoutID: NodeJS.Timeout | null = null;
 
-	public queue: SongData[];
+	private queue_: SongData[];
 	private currentSong_: SongData | null = null;
 
 	// Readonly from ouside and both read and write from the inside
+	get queue() {
+		return this.queue_ as ReadonlyArray<SongData>;
+	}
 	get currentSong() {
 		return this.currentSong_;
 	}
@@ -38,11 +41,19 @@ export class ServerQueue {
 	private queueLock = false;
 	private playMessage: Message<boolean> | null | void;
 
-	public constructor(voiceConnection: VoiceConnection, textChannel: TextBasedChannel) {
+	/**
+	 * Initialize a ServerQueue object that handles music playback
+	 * @param {VoiceConnection} VoiceConnection yt url of the video
+	 * @returns {ServerQueue}
+	 * @public
+	 */
+	public constructor(voiceConnection: VoiceConnection, textChannel: TextBasedChannel, voiceSettings: VoiceSettings) {
 		this.voiceConnection = voiceConnection;
 		this.textChannel = textChannel;
+		this.voiceSettings = voiceSettings;
+
 		this.audioPlayer = createAudioPlayer();
-		this.queue = [];
+		this.queue_ = [];
 		this.playMessage = null;
 
 		// Listens to voice connection state changes and acts accordingly
@@ -140,16 +151,67 @@ export class ServerQueue {
 		voiceConnection.subscribe(this.audioPlayer);
 	}
 
-	// Adds tracks to the queue, as long as it doensn't exceed the limit
-	public enqueue(songs: SongData[] = ([] as SongData[])) {
-		const difference = Number(process.env.MAX_SONGS) - this.queue.length;
-		if (difference < 0) {
-			return;
-		}
-		const newArray = this.queue.concat(songs.slice(0, difference));
-		this.queue = newArray;
+	/**
+	 * Adds tracks to the queue, as long as it doensn't exceed the limit set in {@link VoiceSettings}.
+	 * @param {SongData[]} songs Songs to enqueue
+	 * @param {SongData[]} add Whether to add only the first song to the beginning of the queue.
+	 * @returns {number} Number of songs enqueued
+	 * @public
+	 */
+	public enqueue(songs: SongData[] = ([] as SongData[]), add: boolean = false): number {
+		// Extra to account for current song
+		const extra: number = ((this.currentSong !== null) ? 1 : 0);
+		const difference = this.voiceSettings.maxSongs - this.queue_.length - extra;
 
+		if (difference <= 0) {
+			return 0;
+		}
+
+		const songsToQueue = songs.slice(0, difference);
+		if (add) {
+			this.queue_.unshift(songsToQueue[0]);
+		}
+		else {
+			this.queue_ = this.queue_.concat(songsToQueue);
+		}
 		this.processQueue();
+
+		return songsToQueue.length - extra;
+	}
+
+	/**
+	 * Skips songs. Please pass an int I don't want to validate the argument.
+	 * @param {number} skips # of songs to skip
+	 * @public
+	 */
+	public skip(skips: number) {
+		// Slice queue if necessary
+		if (skips > 1) {
+			const newArray = this.queue_.slice(skips - 1);
+			this.queue_ = newArray;
+		}
+		this.audioPlayer.stop();
+	}
+
+	/**
+	 * Remove song in position. Please pass an int I don't want to validate the argument.
+	 * @param {number} pos Postion of the song to remove
+	 * @returns {string} Name of the song removed. If the song at play is removed, it returns a silly message.
+	 * @public
+	 */
+	public remove(pos: number): string {
+		// Stop current song if pos is 1
+		// Leave channel if no songs left
+		if (pos === 1 || pos <= 0) {
+			this.audioPlayer.stop();
+
+			return 'use /skip dummy...';
+		}
+
+		// Remove song in /queue return name of the removed song
+		const songName = this.queue_[pos - 2].name;
+		this.queue_.splice(pos - 2, 1);
+		return songName;
 	}
 
 	/**
@@ -170,15 +232,27 @@ export class ServerQueue {
 		}
 
 		// Erase queue and stop audio player
-		this.queue = [];
+		this.queue_ = [];
 		this.audioPlayer.stop(true);
 		this.currentSong_ = null;
+	}
+
+	/**
+	 * Whether the queue has reached the limit set in {@link VoiceSettings}.
+	 */
+	public isFull(): boolean {
+		// Extra to account for current song
+		const extra: number = ((this.currentSong !== null) ? 1 : 0);
+		if (extra + this.queue_.length >= this.voiceSettings.maxSongs) {
+			return true;
+		}
+		return false;
 	}
 
 	// Creates the next audioResource
 	private async processQueue(): Promise<void> {
 		// Return if queue is locked, empty or audio playing.
-		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || !this.queue || this.queue.length === 0) {
+		if (this.queueLock || this.audioPlayer.state.status !== AudioPlayerStatus.Idle || !this.queue_ || this.queue_.length === 0) {
 			return;
 		}
 
@@ -186,7 +260,7 @@ export class ServerQueue {
 		this.queueLock = true;
 
 		// Take the first item from the queue.
-		let nextSong: SongData | null = this.queue.shift()!;
+		let nextSong: SongData | null = this.queue_.shift()!;
 
 		// If song doesn't have an id (e.g. the song was retrieved from spotify), look it up
 		if (!nextSong.urlYT) {

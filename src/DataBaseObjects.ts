@@ -20,6 +20,7 @@ Object.defineProperties(GuildSettings.prototype,
 	{
 		'voice': {
 			get: function() {
+				console.log('Voice settings parsed and read');
 				return JSON.parse(this.getDataValue('voice'));
 			},
 			set: function(newVal: VoiceSettings) {
