@@ -23,14 +23,17 @@ export class ServerQueue {
 	public readonly voiceConnection: VoiceConnection;
 	public readonly textChannel: TextBasedChannel;
 	public readonly audioPlayer: AudioPlayer;
-	public readonly voiceSettings: VoiceSettings;
 	// eslint-disable-next-line no-undef
 	public timeoutID: NodeJS.Timeout | null = null;
 
+	private voiceSettings_: VoiceSettings;
 	private queue_: SongData[];
 	private currentSong_: SongData | null = null;
 
 	// Readonly from ouside and both read and write from the inside
+	get voiceSettings() {
+		return this.voiceSettings_;
+	}
 	get queue() {
 		return this.queue_ as ReadonlyArray<SongData>;
 	}
@@ -50,7 +53,7 @@ export class ServerQueue {
 	public constructor(voiceConnection: VoiceConnection, textChannel: TextBasedChannel, voiceSettings: VoiceSettings) {
 		this.voiceConnection = voiceConnection;
 		this.textChannel = textChannel;
-		this.voiceSettings = voiceSettings;
+		this.voiceSettings_ = voiceSettings;
 
 		this.audioPlayer = createAudioPlayer();
 		this.queue_ = [];
@@ -161,7 +164,7 @@ export class ServerQueue {
 	public enqueue(songs: SongData[] = ([] as SongData[]), add: boolean = false): number {
 		// Extra to account for current song
 		const extra: number = ((this.currentSong !== null) ? 1 : 0);
-		const difference = this.voiceSettings.maxSongs - this.queue_.length - extra;
+		const difference = this.voiceSettings_.maxSongs - this.queue_.length - extra;
 
 		if (difference <= 0) {
 			return 0;
@@ -246,10 +249,18 @@ export class ServerQueue {
 	public isFull(): boolean {
 		// Extra to account for current song
 		const extra: number = ((this.currentSong !== null) ? 1 : 0);
-		if (extra + this.queue_.length >= this.voiceSettings.maxSongs) {
+		if (extra + this.queue_.length >= this.voiceSettings_.maxSongs) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Use to update voice settings
+	 * @param {VoiceSettings} settings The new settings
+	 */
+	public updateVoiceSettings(settings: VoiceSettings) {
+		this.voiceSettings_ = settings;
 	}
 
 	// Creates the next audioResource

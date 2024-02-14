@@ -45,7 +45,7 @@ module.exports = {
 			.setName('show')
 			.setDescription('Shows server settings.')),
 
-	async execute(i: LooseCommandInteraction & ChatInputCommandInteraction<CacheType>) {
+	async execute(i: LooseCommandInteraction & ChatInputCommandInteraction<'cached'>) {
 		// This may take a while to execute on a Pi
 		await i.deferReply();
 
@@ -69,6 +69,10 @@ module.exports = {
 			if (JSON.stringify(newVoice) !== JSON.stringify(prevVoice)) {
 				settings.voice = newVoice;
 				await settings.save().catch(e => console.log(e));
+
+				// Check if server has active ServerQueue, and update its VoiceSettings if so
+				const serverQueue = i.client.queues.get(i.guildId!);
+				if (serverQueue) serverQueue.updateVoiceSettings(newVoice);
 
 				console.log('New VoiceSettings saved:', settings.dataValues.voice);
 				changed = true;
