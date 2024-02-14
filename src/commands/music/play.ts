@@ -101,6 +101,6 @@ function enqueueReply(interaction: LooseCommandInteraction, songs: SongData[], q
 		interaction.followUp(`${songs[0].name} has been added to the queue.`);
 	}
 	else {
-		interaction.followUp((`${songs[0].name}\n + ${quantity} more song(s)  have been added to the queue.`));
+		interaction.followUp((`${songs[0].name}\n + ${quantity - 1} more song(s)  have been added to the queue.`));
 	}
 }
