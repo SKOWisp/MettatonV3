@@ -168,15 +168,18 @@ export class ServerQueue {
 		}
 
 		const songsToQueue = songs.slice(0, difference);
+		const count = songsToQueue.length;
+
 		if (add) {
 			this.queue_.unshift(songsToQueue[0]);
 		}
 		else {
 			this.queue_ = this.queue_.concat(songsToQueue);
 		}
+
 		this.processQueue();
 
-		return songsToQueue.length - extra;
+		return count;
 	}
 
 	/**

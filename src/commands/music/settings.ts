@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, CacheType } from 'discord.js';
 import { FilterSettings, LooseCommandInteraction, VoiceSettings } from '../..';
-import { GuildSettings, MettatonMessage } from '../..';
+import { MettatonMessage } from '../..';
 
 import 'dotenv/config';
 
