@@ -71,5 +71,31 @@ function splitString(text: string, { maxLength = 2_000, char = '\n', prepend = '
 	return messages.concat(msg + append).filter(m => m);
 }
 
+/**
+  * Splits a string into multiple chunks at a designated character that do not exceed a specific length.
+  * @param {string} text Content to split
+  * @param {SplitOptions} [options] Options controlling the behavior of the split
+  * @returns {string[]}
+  */
+function timeStringToSeconds(timeString: string) {
+	// Split the input string into hours, minutes, and seconds
+	const timeComponents = timeString.split(':').map(Number);
 
-export { matches, shuffle, splitString };
+	if (timeComponents.length === 2) {
+		// If there are only two components, assume mm:ss format
+		const [minutes, seconds] = timeComponents;
+		return minutes * 60 + seconds;
+	}
+	else if (timeComponents.length === 3) {
+		// If there are three components, assume hh:mm:ss format
+		const [hours, minutes, seconds] = timeComponents;
+		return hours * 3600 + minutes * 60 + seconds;
+	}
+	else {
+		// Invalid format, return NaN or handle it as needed
+		console.error('Invalid time format');
+		return NaN;
+	}
+}
+
+export { matches, shuffle, splitString, timeStringToSeconds };

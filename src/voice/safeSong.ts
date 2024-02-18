@@ -1,6 +1,9 @@
 import ytsr from 'ytsr';
 import { SongData } from '.';
+import { timeStringToSeconds } from '..'
+
 import 'dotenv/config';
+
 
 const searchLimit = Number(process.env.SEARCH_LIMIT);
 const options = {
@@ -36,14 +39,21 @@ export async function safeSong(query: string, maxDuration: number = 0): Promise<
 		return `Your query: *${query}* did not bring up any videos.`;
 	}
 
-	// Filter out videos by duration
+	// Filter out a videos by duration
 	if (maxDuration !== 0) {
-		videos = videos.filter(v => Number(v.duration) <= maxDuration);
-	}
+		for (let i = 0; i < videos.length; i++) {
+			if (timeStringToSeconds(videos[i].duration!) <= maxDuration) {
+				videos = [videos[i]];
+				break;
+			}
+			console.log(timeStringToSeconds(videos[i].duration!));
+			console.log(videos[i].title, videos[i].duration);
+		}
 
-	// None of the results is of type video....
-	if (videos.length === 0) {
-		return `Your query: *${query}* did not bring up any videos under ${maxDuration} seconds. Try changing the server's voice settings.`;
+		// None of the videos is under the length limit
+		if (videos.length > 1) {
+			return `Your query: *${query}* did not bring up any videos under ${maxDuration} seconds. Try changing the server's voice settings.`;
+		}
 	}
 
 	const vid = videos[0];
