@@ -6,16 +6,17 @@ const searchLimit = Number(process.env.SEARCH_LIMIT);
 const options = {
 	maxRetries: 4,
 	maxReconnects: 2,
+
 };
 
 /**
  * Attemps to lookup a string in YT, returns metadata if successful,
  * otherwise null.
  * @param query The string that will be looked up
+ * @param maxDuration The max allowed duration of the video, in seconds.
  * @returns
  */
-
-export async function safeSong(query: string): Promise<SongData | null> {
+export async function safeSong(query: string, maxDuration: number = 0): Promise<SongData | string> {
 	console.log('Looking up: ' + query);
 
 	// Perform the search
@@ -25,24 +26,31 @@ export async function safeSong(query: string): Promise<SongData | null> {
 		return null;
 	});
 
-	if (!ytData) return null;
+	if (!ytData) return 'ytsr (looking up your query in yt) is giving me headaches, try again in a sec.';
 
 	// Filter out non-video elements
-	let ytItem: ytsr.Item | null = null;
-	for (let i = 0; i < searchLimit; i++) {
-		if (ytData.items[i].type === 'video') {
-			ytItem = ytData!.items[i];
-			break;
-		}
-	}
+	let videos: ytsr.Video[] = ytData.items.filter(i => i.type === 'video') as ytsr.Video[];
 
 	// Somehow none of the results is of type video....
-	if (!ytItem) {
-		console.log(`WOW, ${query} did not bring up any videos`);
-		return null;
+	if (videos.length === 0) {
+		return `Your query: *${query}* did not bring up any videos.`;
 	}
 
-	const vid = (ytItem! as ytsr.Video);
+	// Filter out videos by duration
+	if (maxDuration !== 0) {
+		videos = videos.filter(function(v) {
+			if (Number(v.duration) <= maxDuration) return true;
+			console.log(v.title, v.title, v.duration);
+			return false;
+		});
+	}
+
+	// None of the results is of type video....
+	if (videos.length === 0) {
+		return `Your query: *${query}* did not bring up any videos under ${maxDuration} seconds. Try changing the server's voice settings.`;
+	}
+
+	const vid = videos[0];
 	console.log('Found: ' + vid.title);
 
 	return new SongData({ name: vid.title, urlYT: vid.url }, 'youtube');

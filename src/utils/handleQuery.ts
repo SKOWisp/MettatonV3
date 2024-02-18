@@ -23,7 +23,7 @@ const { getData } = require('spotify-url-info')(fetch);
  * @param doShuffle Whether to pre-shuffle songs added from playlists
  * @returns
  */
-async function handleQuery(query: string, doShuffle: boolean = true): Promise<SongData[] | string> {
+async function handleQuery(query: string, doShuffle: boolean = true, maxDuration: number = 0): Promise<SongData[] | string> {
 
 	console.log('Parsing: ' + query);
 
@@ -47,8 +47,8 @@ async function handleQuery(query: string, doShuffle: boolean = true): Promise<So
 	}
 
 	// Query is just a string
-	const song = await safeSong(query);
-	if (!song) return 'ytsr (looking up your query in yt) is giving me headaches, try again in a sec.';
+	const song = await safeSong(query, maxDuration);
+	if (typeof song === 'string') return song;
 	return [song];
 }
 

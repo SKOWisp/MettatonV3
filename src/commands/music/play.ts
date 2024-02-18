@@ -44,7 +44,11 @@ module.exports = {
 		}
 
 		// Dirty 'as any' cast, but we need it because discord.js typings are funky
-		const songs: SongData[] | string = await handleQuery((interaction.options as any).getString('song'), settings.shuffle);
+		const songs: SongData[] | string = await handleQuery(
+			(interaction.options as any).getString('song'),
+			settings.shuffle,
+			settings.maxDuration,
+		);
 
 		// A lone string means handleQuery threw an error
 		if (typeof songs === 'string') {

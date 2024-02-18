@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, GuildMember } from 'discord.js';
+import { SlashCommandBuilder, GuildMember, ChatInputCommandInteraction } from 'discord.js';
 import {
 	LooseCommandInteraction,
 	ytHostnames,
@@ -21,7 +21,7 @@ module.exports = {
 			option.setName('song')
 				.setDescription('Query or url.')
 				.setRequired(true)),
-	async execute(interaction: LooseCommandInteraction) {
+	async execute(interaction: LooseCommandInteraction & ChatInputCommandInteraction<'cached'>) {
 		// Defer reply to processs request
 		await interaction.deferReply();
 
@@ -52,13 +52,15 @@ module.exports = {
 
 		// Query is an invalid link
 		if (validator.isURL(query) && !validator.isURL(query, validatorOpts)) {
-			return interaction.followUp('I do not handle that page');
+			return interaction.followUp('I do not handle that page.');
 		}
 
 		// Query isn't a url
 		if (!validator.isURL(query)) {
-			const song = await safeSong(query);
-			if (!song) return interaction.followUp('ytsr (looking up your query in yt) is giving me headaches, try again in a sec.');
+			const voiceSettings = serverQueue.voiceSettings;
+
+			const song = await safeSong(query, voiceSettings.maxDuration ?? 0);
+			if (typeof song === 'string') return interaction.followUp(song);
 
 			serverQueue.enqueue([song], true);
 			// In case /add is used when nothing is playing

@@ -19,6 +19,7 @@ export type VoiceSettings = {
 	readonly shuffle: boolean,
 	readonly maxSongs: number,
 	readonly disconnectTimeout: number,
+	readonly maxDuration: number,
 }
 
 export type FilterSettings = {
@@ -32,6 +33,7 @@ const defaultVoice: VoiceSettings = {
 	shuffle: true,
 	maxSongs: 150,
 	disconnectTimeout: 180,
+	maxDuration: 60 * 60 * 10 + 1,
 };
 const defaultFilter: FilterSettings = {
 	nya: true,

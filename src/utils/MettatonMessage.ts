@@ -1,6 +1,6 @@
 ﻿import { BaseMessageOptions, Embed, Guild } from 'discord.js';
 import { getAverageColor } from 'fast-average-color-node';
-import { IGuildSettings, SongData } from '..';
+import { FilterSettings, SongData, VoiceSettings } from '..';
 import fs from 'node:fs';
 
 export class MettatonMessage {
@@ -106,7 +106,7 @@ export class MettatonMessage {
 	 * @param {Guild} guild Guild object to get data from.
 	 * @returns {Embed[]}
 	 */
-	static createSettingsEmbeds(settings: IGuildSettings, guild: Guild): Embed[] {
+	static createSettingsEmbeds(settings: { voice: VoiceSettings, filter: FilterSettings}, guild: Guild): Embed[] {
 		// Settings embed
 		let embeds: any = {
 			color: 0,
@@ -120,6 +120,7 @@ export class MettatonMessage {
 				{
 					'name': '** Voice **',
 					'value': `* shuffle: ${settings.voice.shuffle}\n` +
+						`* maxDuration: ${settings.voice.maxDuration}\n` +
 						`* maxSongs: ${settings.voice.maxSongs}\n` +
 						`* disconnectTimeout: ${settings.voice.disconnectTimeout}`,
 					'inline': true,

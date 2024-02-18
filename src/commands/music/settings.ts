@@ -23,7 +23,13 @@ module.exports = {
 				.setMinValue(10)
 				.setRequired(false))
 			.addIntegerOption(option => option
-				.setName('dc_tolerance')
+				.setName('max_duration')
+				.setDescription('YT video length limit, in seconds. Set to 0 to disable filter. Doesn\'t affect direct YT url queries.')
+				.setMaxValue(36001)
+				.setMinValue(0)
+				.setRequired(false))
+			.addIntegerOption(option => option
+				.setName('tolerance')
 				.setDescription('Seconds of tolerance before auto-disconnecting.')
 				.setMaxValue(Number(process.env.TOLERANCE))
 				.setMinValue(5)
@@ -62,7 +68,8 @@ module.exports = {
 			const newVoice: VoiceSettings = {
 				shuffle: i.options.getBoolean('shuffle') ?? prevVoice.shuffle,
 				maxSongs: (i.options as any).getInteger('max_songs') ?? prevVoice.maxSongs,
-				disconnectTimeout: (i.options as any).getInteger('dc_tolerance') ?? prevVoice.disconnectTimeout,
+				disconnectTimeout: (i.options as any).getInteger('tolerance') ?? prevVoice.disconnectTimeout,
+				maxDuration: (i.options as any).getInteger('max_duration') ?? prevVoice.maxDuration,
 			};
 
 			// Check if there were any changes
@@ -98,7 +105,7 @@ module.exports = {
 		// Show settings
 		const emoji = MettatonMessage.randomEmoji();
 		const content = emoji + `  ***${changed ? 'New' : 'Current'}*** Settings:  ` + emoji;
-		const embeds = MettatonMessage.createSettingsEmbeds(settings, i.guild!);
+		const embeds = MettatonMessage.createSettingsEmbeds({ voice: settings.voice, filter: settings.filter }, i.guild!);
 
 		return i.followUp({ content, embeds });
 	},

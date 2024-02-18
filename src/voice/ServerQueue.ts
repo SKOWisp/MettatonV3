@@ -274,18 +274,20 @@ export class ServerQueue {
 		this.queueLock = true;
 
 		// Take the first item from the queue.
-		let nextSong: SongData | null = this.queue_.shift()!;
+		let nextSong: SongData = this.queue_.shift()!;
 
 		// If song doesn't have an id (e.g. the song was retrieved from spotify), look it up
 		if (!nextSong.urlYT) {
-			nextSong = await safeSong(nextSong.name);
+			const video = await safeSong(nextSong.name);
 
 			// If this fails, try next song
-			if (!nextSong || !nextSong.urlYT) {
+			if (typeof video === 'string') {
 				console.error(`Couldn't find' "${nextSong!.name}"`);
 				this.queueLock = false;
 				return this.processQueue();
 			}
+
+			nextSong = video;
 		}
 
 		await MettatonStream.YouTube(nextSong.urlYT!)
