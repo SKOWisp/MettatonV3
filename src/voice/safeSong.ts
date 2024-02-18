@@ -38,11 +38,7 @@ export async function safeSong(query: string, maxDuration: number = 0): Promise<
 
 	// Filter out videos by duration
 	if (maxDuration !== 0) {
-		videos = videos.filter(function(v) {
-			if (Number(v.duration) <= maxDuration) return true;
-			console.log(v.title, v.title, v.duration);
-			return false;
-		});
+		videos = videos.filter(v => Number(v.duration) <= maxDuration);
 	}
 
 	// None of the results is of type video....
