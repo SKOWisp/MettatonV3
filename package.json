@@ -25,7 +25,7 @@
     "spotify-url-info": "^3.2.6",
     "url-parse": "^1.5.10",
     "validator": "^13.11.0",
-    "ytdl-core": "git+ssh://git@github.com:khlevon/node-ytdl-core.git#v4.11.4-patch.2",
+    "ytdl-core": "^4.11.5",
     "ytpl": "^2.3.0",
     "ytsr": "^3.8.4"
   },
