@@ -14,6 +14,7 @@ import {
  * @prop {boolean} shuffle Whether to shuffle added playlists.
  * @prop {number} maxSongs The maximum number of songs that can be added to the queue.
  * @prop {number} disconnectTimeout Time in seconds the bot will remain in an empty voice channel
+ * @prop {number} maxDuration Max song duration to use as filter with ytsr
  */
 export type VoiceSettings = {
 	readonly shuffle: boolean,

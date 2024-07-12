@@ -1,7 +1,6 @@
 import ytsr from 'ytsr';
 import { SongData } from '.';
-import { timeStringToSeconds } from '..'
-
+import { timeStringToSeconds } from '..';
 import 'dotenv/config';
 
 

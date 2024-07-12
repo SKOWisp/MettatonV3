@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, CacheType } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { FilterSettings, LooseCommandInteraction, VoiceSettings } from '../..';
 import { MettatonMessage } from '../..';
 
