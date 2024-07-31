@@ -1,7 +1,7 @@
 import {
 	StreamType,
 } from '@discordjs/voice';
-import ytdl from 'ytdl-core';
+import ytdl from '@distube/ytdl-core';
 import { FFmpeg } from 'prism-media';
 import { SongData } from '.';
 interface StreamOptions {

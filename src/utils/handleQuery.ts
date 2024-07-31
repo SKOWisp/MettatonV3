@@ -11,7 +11,7 @@ import { matches, shuffle } from '.';
 import validator from 'validator';
 import URLParse from 'url-parse';
 import ytpl from 'ytpl';
-import ytdl from 'ytdl-core';
+import ytdl from '@distube/ytdl-core';
 
 // spotify-url-info modules
 const fetch = require('isomorphic-unfetch');
