@@ -66,6 +66,7 @@ export class MettatonStream {
 
 		const args = [
 			// Reconnect flags. Pray at least one works
+			// See https://ffmpeg.org/ffmpeg-protocols.html#http
 			'-reconnect', '1',
 			'-reconnect_streamed', '1',
 			'-reconnect_on_network_error', '1',
@@ -83,7 +84,12 @@ export class MettatonStream {
 			'-ac', '2',
 			'-f', 'opus',
 			'-acodec', 'libopus', '-b:a', '48k',
+			// Limit download speed
+			// See https://github.com/yt-dlp/yt-dlp/pull/10456
+			'-maxrate:a', '200k', '-minrate:a', '48k',
 		];
+
+		// https://github.com/yt-dlp/yt-dlp/pull/10456
 
 
 		// if (typeof options.seek === 'number' && options.seek > 0) args.unshift('-ss', options.seek.toString());
