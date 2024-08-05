@@ -133,3 +133,5 @@ node_modules
 test
 emojis.txt
 *.sqlite
+cookies.txt
+cookies.json

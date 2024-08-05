@@ -4,6 +4,8 @@ import {
 import ytdl from '@distube/ytdl-core';
 import { FFmpeg } from 'prism-media';
 import { SongData } from '.';
+import { YouTubeAgent } from './plugins/YouTubeAgent';
+
 interface StreamOptions {
 	seek?: number;
 	ffmpegArgs?: string[];
@@ -30,7 +32,7 @@ export class MettatonStream {
 	 * @private
 	 */
 	static async YouTube(url: string): Promise<MettatonStream> {
-		const video: ytdl.videoInfo | void = await ytdl.getInfo(url)
+		const video: ytdl.videoInfo | void = await ytdl.getInfo(url, YouTubeAgent.ytdlOptions)
 			.then((data) => {
 				return data;
 			})
@@ -88,8 +90,6 @@ export class MettatonStream {
 			// See https://github.com/yt-dlp/yt-dlp/pull/10456
 			'-maxrate:a', '200k', '-minrate:a', '48k',
 		];
-
-		// https://github.com/yt-dlp/yt-dlp/pull/10456
 
 
 		// if (typeof options.seek === 'number' && options.seek > 0) args.unshift('-ss', options.seek.toString());

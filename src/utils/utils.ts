@@ -1,5 +1,5 @@
 // Checks if an element can be found in an array
-function matches(query: any, array: any[]) {
+export function matches(query: any, array: any[]) {
 	for (let i = 0; i < array.length; i++) {
 		const element = array[i];
 		if (query === element) {
@@ -10,7 +10,7 @@ function matches(query: any, array: any[]) {
 }
 
 // Shuffles an array
-function shuffle(array: any[]) {
+export function shuffle(array: any[]) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
 		[array[i], array[j]] = [array[j], array[i]];
@@ -32,7 +32,7 @@ interface SplitOptions {
   * @param {SplitOptions} [options] Options controlling the behavior of the split
   * @returns {string[]}
   */
-function splitString(text: string, { maxLength = 2_000, char = '\n', prepend = '', append = '' }: SplitOptions = {}) {
+export function splitString(text: string, { maxLength = 2_000, char = '\n', prepend = '', append = '' }: SplitOptions = {}) {
 
 	if (text == '') return [];
 	if ((text + append + prepend).length <= maxLength) return [prepend + text + append];
@@ -77,7 +77,7 @@ function splitString(text: string, { maxLength = 2_000, char = '\n', prepend = '
   * @param {SplitOptions} [options] Options controlling the behavior of the split
   * @returns {string[]}
   */
-function timeStringToSeconds(timeString: string) {
+export function timeStringToSeconds(timeString: string) {
 	// Split the input string into hours, minutes, and seconds
 	const timeComponents = timeString.split(':').map(Number);
 
@@ -98,4 +98,23 @@ function timeStringToSeconds(timeString: string) {
 	}
 }
 
-export { matches, shuffle, splitString, timeStringToSeconds };
+export function checkInvalidKey(
+	target: Record<string, any>,
+	source: Record<string, any> | string[],
+	sourceName: string,
+) {
+	if (!isObject(target)) throw new Error(`INVALID_TYPE of "${target}" at "${sourceName}"`);
+	const sourceKeys = Array.isArray(source) ? source : objectKeys(source);
+	const invalidKey = objectKeys(target).find(key => !sourceKeys.includes(key));
+	if (invalidKey) throw new Error(`INVALID_KEY "${invalidKey}" at ${sourceName}`);
+}
+
+export function isObject(obj: any): obj is object {
+	return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+}
+
+export type KeyOf<T> = T extends object ? (keyof T)[] : [];
+export function objectKeys<T>(obj: T): KeyOf<T> {
+	if (!isObject(obj)) return [] as KeyOf<T>;
+	return Object.keys(obj) as KeyOf<T>;
+}

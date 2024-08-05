@@ -5,6 +5,7 @@ import { IGuildSettings } from '.';
 import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
+import { YouTubeAgent } from './voice/plugins/YouTubeAgent';
 
 console.log('Bot is starting...');
 
@@ -64,5 +65,7 @@ for (const file of eventFiles) {
 // Loading emojis
 const settingsPath = path.resolve(__dirname, '..');
 MettatonMessage.LoadEmojis(path.join(settingsPath, 'emojis.txt'));
+const ytCookies = fs.readFileSync(path.join(settingsPath, 'cookies.json'), 'utf8');
+YouTubeAgent.CreateYTAgent({ cookies: JSON.parse(ytCookies) });
 
 void lClient.login(process.env.BOT_TOKEN);
