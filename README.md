@@ -22,7 +22,6 @@
 * [Contributing](#contributing)
 * [License](#license)
 * [Authors](#authors)
-* [Acknowledgements](#acknowledgements)
 
 ## Getting Started
 
@@ -30,7 +29,7 @@ This bot was built using [discord.js](https://discord.js.org/), if you are havin
 
 ### Prerequisites
 
-* [Node.js](https://nodejs.org)
+* [Node.js](https://nodejs.org). I use v18.17.1, but newer versions should work too.
 * Bot token (see above).
 
 ### Installation
@@ -38,13 +37,13 @@ This bot was built using [discord.js](https://discord.js.org/), if you are havin
 0. Create your bot on the discord developer portal and add it to a server by modifying and using the following link:
 
 ```
-https://discord.com/api/oauth2/authorize?client_id= < discord id of the bot > &permissions=103885840&scope=bot%20applications.commands
+https://discord.com/api/oauth2/authorize?client_id= < discord id of the bot > &permissions=137543216192&scope=bot%20applications.commands
 ```
 
 Example: 
 
 ```
-https://discord.com/api/oauth2/authorize?client_id=123456789101112131&permissions=103885840&scope=bot%20applications.commands
+https://discord.com/api/oauth2/authorize?client_id=123456789101112131&permissions=137543216192&scope=bot%20applications.commands
 ```
 
 
@@ -85,8 +84,9 @@ DEGEN=skowisp
 ```sh
 npm run build
 npm run deploy
+npm run database
 ```
-This will generate a folder called 'dist' in which you'll find a file called 'Bot.js'. Run this file to start the bot.
+This will generate a folder called 'dist' in which you'll find a file called 'Bot.js', as well as database.sqlite file that will store each server's voice settings. Run this file to start the bot.
 
 ```sh
 node dist/Bot.js
@@ -99,4 +99,4 @@ Distributed under the MIT License. See [LICENSE](https://github.com/SKOWisp/Mett
 
 ## Authors
 
-* **Román T. Vidal Tamayo** - *Physics Student* - [GitHub](https://github.com/SKOWisp) - *Owner*
+* **Román T. Vidal Tamayo** - [GitHub](https://github.com/SKOWisp) - *Owner*
