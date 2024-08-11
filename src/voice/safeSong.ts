@@ -45,8 +45,6 @@ export async function safeSong(query: string, maxDuration: number = 0): Promise<
 				videos = [videos[i]];
 				break;
 			}
-			console.log(timeStringToSeconds(videos[i].duration!));
-			console.log(videos[i].title, videos[i].duration);
 		}
 
 		// None of the videos is under the length limit
