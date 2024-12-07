@@ -30,6 +30,7 @@ This bot was built using [discord.js](https://discord.js.org/), if you are havin
 ### Prerequisites
 
 * [Node.js](https://nodejs.org). I use v18.17.1, but newer versions should work too.
+* FFmpeg
 * Bot token (see above).
 
 ### Installation
