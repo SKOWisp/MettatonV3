@@ -1,6 +1,6 @@
 {
   "name": "mettatonv3",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Hopefully a better version of the Mettaton Discord bot.",
   "main": "src/Bot.ts",
   "scripts": {
@@ -17,7 +17,8 @@
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.16.0",
-    "@distube/ytdl-core": "^4.14.1",
+    "@distube/ytdl-core": "^4.15.1",
+    "@distube/ytsr": "^2.0.4",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "fast-average-color-node": "^2.6.0",
@@ -29,8 +30,7 @@
     "sqlite3": "^5.1.7",
     "url-parse": "^1.5.10",
     "validator": "^13.11.0",
-    "ytpl": "^2.3.0",
-    "ytsr": "^3.8.4"
+    "ytpl": "^2.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.4.8",

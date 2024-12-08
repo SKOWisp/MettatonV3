@@ -65,7 +65,15 @@ for (const file of eventFiles) {
 // Loading emojis
 const settingsPath = path.resolve(__dirname, '..');
 MettatonMessage.LoadEmojis(path.join(settingsPath, 'emojis.txt'));
-const ytCookies = fs.readFileSync(path.join(settingsPath, 'cookies.json'), 'utf8');
-YouTubeAgent.CreateYTAgent({ cookies: JSON.parse(ytCookies) });
+
+// Loading cookies
+const cookiesPath = path.join(settingsPath, 'cookies.json')
+if (!(fs.existsSync(cookiesPath) && fs.lstatSync(cookiesPath).isFile())) {
+	console.warn('No YT cookies file found.');
+	YouTubeAgent.CreateYTAgent();
+} else {
+	const ytCookies = fs.readFileSync(cookiesPath, "utf8");
+	YouTubeAgent.CreateYTAgent({ cookies: JSON.parse(ytCookies) });
+}
 
 void lClient.login(process.env.BOT_TOKEN);

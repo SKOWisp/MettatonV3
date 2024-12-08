@@ -1,4 +1,4 @@
-import ytsr from 'ytsr';
+import ytsr from '@distube/ytsr';
 import { SongData } from '.';
 import { timeStringToSeconds } from '..';
 import 'dotenv/config';
@@ -54,7 +54,7 @@ export async function safeSong(query: string, maxDuration: number = 0): Promise<
 	}
 
 	const vid = videos[0];
-	console.log('Found: ' + vid.title);
+	console.log('Found: ' + vid.name);
 
-	return new SongData({ name: vid.title, urlYT: vid.url }, 'youtube');
+	return new SongData({ name: vid.name, urlYT: vid.url }, 'youtube');
 }
