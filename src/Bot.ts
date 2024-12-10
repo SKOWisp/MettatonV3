@@ -67,12 +67,13 @@ const settingsPath = path.resolve(__dirname, '..');
 MettatonMessage.LoadEmojis(path.join(settingsPath, 'emojis.txt'));
 
 // Loading cookies
-const cookiesPath = path.join(settingsPath, 'cookies.json')
+const cookiesPath = path.join(settingsPath, 'cookies.json');
 if (!(fs.existsSync(cookiesPath) && fs.lstatSync(cookiesPath).isFile())) {
 	console.warn('No YT cookies file found.');
 	YouTubeAgent.CreateYTAgent();
-} else {
-	const ytCookies = fs.readFileSync(cookiesPath, "utf8");
+}
+else {
+	const ytCookies = fs.readFileSync(cookiesPath, 'utf8');
 	YouTubeAgent.CreateYTAgent({ cookies: JSON.parse(ytCookies) });
 }
 
