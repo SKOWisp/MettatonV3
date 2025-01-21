@@ -19,6 +19,7 @@
     "@discordjs/voice": "^0.16.0",
     "@distube/ytdl-core": "^4.15.1",
     "@distube/ytsr": "^2.0.4",
+    "@hydralerne/youtube-api": "^1.0.2",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "fast-average-color-node": "^2.6.0",
