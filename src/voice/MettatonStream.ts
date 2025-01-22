@@ -5,6 +5,8 @@ import ytdl from '@distube/ytdl-core';
 import { FFmpeg } from 'prism-media';
 import { SongData } from '.';
 import { YouTubeAgent } from './plugins/YouTubeAgent';
+
+import { Payload, Format } from 'youtube-dl-exec';
 import ytdlex from 'youtube-dl-exec';
 
 interface StreamOptions {
@@ -14,13 +16,13 @@ interface StreamOptions {
 	type?: StreamType;
 }
 
-const chooseBestVideoFormat = (formats: any[], isLive = false) => {
-	let filter = (format: any) => format.acodec != 'none';
-	// if (isLive) filter = (format: ytdl.videoFormat) => format.hasAudio && format.isHLS;
+const chooseBestVideoFormat = (formats: Format[], isLive = false) => {
+	let filter = (format: Format) => format.acodec != 'none' && !format.acodec;
+	if (isLive) filter = (format: Format) => format.acodec != 'none' && !format.acodec && format.format.includes('m3u8');
 	formats = formats
 		.filter(filter)
-		.sort((a, b) => Number(b.abr) - Number(a.abr));
-	return formats.find(format => format.vcodec == 'none') || formats.sort((a, b) => Number(b.abr) - Number(a.abr))[0];
+		.sort((a, b) => Number(b.abr) - Number(a.abr) || Number(a.tbr) - Number(b.tbr));
+	return formats.find(format => format.vcodec == 'none') || formats.sort((a, b) => Number(b.tbr) - Number(a.tbr))[0];
 };
 
 
@@ -39,7 +41,7 @@ export class MettatonStream {
 			})
 			.catch((error: Error) => { throw error; });
 
-		const video: any = await ytdlex(url, {
+		const video: Payload | string = await ytdlex(url, {
 			dumpSingleJson: true,
 			noCheckCertificates: true,
 			noWarnings: true,
@@ -51,10 +53,8 @@ export class MettatonStream {
 			})
 			.catch((error: Error) => { throw error; });
 
-		const formats = video.formats;
-
-		if (!video || !formats.length) throw new Error('This video is unavailable.');
-		const bestFormat = chooseBestVideoFormat(formats);
+		if (!video || typeof video === 'string' || !video.formats.length) throw new Error('This video is unavailable.');
+		const bestFormat = chooseBestVideoFormat(video.formats);
 		if (!bestFormat) throw new Error('Unplayable formats.');
 
 		return new MettatonStream(bestFormat.url, videoInfo);
@@ -87,6 +87,9 @@ export class MettatonStream {
 			'-reconnect_on_network_error', '1',
 			'-reconnect_on_http_error', '4xx,5xx',
 			'-reconnect_delay_max', '5',
+			// https://stackoverflow.com/questions/68209379/error-in-the-pull-function-keepalive-request-failed-for-when-opening-url
+			// There should be a better fix...
+			'-http_persistent', '0',
 
 			// Input
 			'-i', url,
