@@ -5,6 +5,7 @@ import ytdl from '@distube/ytdl-core';
 import { FFmpeg } from 'prism-media';
 import { SongData } from '.';
 import { YouTubeAgent } from './plugins/YouTubeAgent';
+import ytdlex from 'youtube-dl-exec';
 
 interface StreamOptions {
 	seek?: number;
@@ -13,13 +14,13 @@ interface StreamOptions {
 	type?: StreamType;
 }
 
-export const chooseBestVideoFormat = (formats: ytdl.videoFormat[], isLive = false) => {
-	let filter = (format: ytdl.videoFormat) => format.hasAudio;
-	if (isLive) filter = (format: ytdl.videoFormat) => format.hasAudio && format.isHLS;
+const chooseBestVideoFormat = (formats: any[], isLive = false) => {
+	let filter = (format: any) => format.acodec != 'none';
+	// if (isLive) filter = (format: ytdl.videoFormat) => format.hasAudio && format.isHLS;
 	formats = formats
 		.filter(filter)
-		.sort((a, b) => Number(b.audioBitrate) - Number(a.audioBitrate) || Number(a.bitrate) - Number(b.bitrate));
-	return formats.find(format => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
+		.sort((a, b) => Number(b.abr) - Number(a.abr));
+	return formats.find(format => format.vcodec == 'none') || formats.sort((a, b) => Number(b.abr) - Number(a.abr))[0];
 };
 
 
@@ -32,9 +33,21 @@ export class MettatonStream {
 	 * @private
 	 */
 	static async YouTube(url: string): Promise<MettatonStream> {
-		const video: ytdl.videoInfo | void = await ytdl.getInfo(url, YouTubeAgent.ytdlOptions)
+		const videoInfo: ytdl.videoInfo | void = await ytdl.getBasicInfo(url, YouTubeAgent.ytdlOptions)
 			.then((data) => {
 				return data;
+			})
+			.catch((error: Error) => { throw error; });
+
+		const video: any = await ytdlex(url, {
+			dumpSingleJson: true,
+			noCheckCertificates: true,
+			noWarnings: true,
+			preferFreeFormats: true,
+			addHeader: ['referer:youtube.com', 'user-agent:googlebot']
+			})
+			.then((output) => {
+				return output;
 			})
 			.catch((error: Error) => { throw error; });
 
@@ -44,7 +57,7 @@ export class MettatonStream {
 		const bestFormat = chooseBestVideoFormat(formats);
 		if (!bestFormat) throw new Error('Unplayable formats.');
 
-		return new MettatonStream(bestFormat.url, video);
+		return new MettatonStream(bestFormat.url, videoInfo);
 	}
 
 	type: StreamType = StreamType.OggOpus;
