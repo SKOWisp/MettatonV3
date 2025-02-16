@@ -1,13 +1,15 @@
 import {
 	StreamType,
 } from '@discordjs/voice';
-import ytdl from '@distube/ytdl-core';
 import { FFmpeg } from 'prism-media';
-import { SongData } from '.';
-import { YouTubeAgent } from './plugins/YouTubeAgent';
 
-import { Payload, Format } from 'youtube-dl-exec';
+import ytdl from '@distube/ytdl-core';
+import { Payload, Format, FormatNote } from 'youtube-dl-exec';
 import ytdlex from 'youtube-dl-exec';
+
+import { SongData } from '.';
+import { YouTubeAgent } from './plugins';
+import { checkUrl } from '../utils';
 
 interface StreamOptions {
 	seek?: number;
@@ -16,17 +18,31 @@ interface StreamOptions {
 	type?: StreamType;
 }
 
-const chooseBestVideoFormat = (formats: Format[], isLive = false) => {
-	let filter = (format: Format) => format.acodec != 'none' && !format.acodec;
-	if (isLive) filter = (format: Format) => format.acodec != 'none' && !format.acodec && format.format.includes('m3u8');
-	formats = formats
-		.filter(filter)
-		.sort((a, b) => Number(b.abr) - Number(a.abr) || Number(a.tbr) - Number(b.tbr));
-	return formats.find(format => format.vcodec == 'none') || formats.sort((a, b) => Number(b.tbr) - Number(a.tbr))[0];
+export const chooseBestVideoFormat = (formats: ytdl.videoFormat[] | Format[], isLive = false) => {
+	if ((formats[0] as any).hasAudio !== undefined) {
+		formats = formats as ytdl.videoFormat[]
+
+		let filter = (format: ytdl.videoFormat) => format.hasAudio;
+		if (isLive) filter = (format: ytdl.videoFormat) => format.hasAudio && format.isHLS;
+		formats = formats
+			.filter(filter)
+			.sort((a, b) => Number(b.audioBitrate) - Number(a.audioBitrate) || Number(a.bitrate) - Number(b.bitrate));
+		return formats.find(format => !format.hasVideo) || formats.sort((a, b) => Number(a.bitrate) - Number(b.bitrate))[0];
+	}
+	else {
+		formats = formats as Format[]
+		
+		let filter = (format: Format) => format.acodec != 'none' && !format.acodec;
+		if (isLive) filter = (format: Format) => format.acodec != 'none' && !format.acodec && format.format.includes('m3u8');
+		formats = formats
+			.filter(filter)
+			.sort((a, b) => Number(b.abr) - Number(a.abr) || Number(a.tbr) - Number(b.tbr));
+		return formats.find(format => format.vcodec == 'none') || formats.sort((a, b) => Number(b.tbr) - Number(a.tbr))[0];
+	}
 };
 
 
-// Shamelessly copied from https://distube.js.org
+
 export class MettatonStream {
 	/**
 	 * Create a stream from yt url
@@ -35,29 +51,43 @@ export class MettatonStream {
 	 * @private
 	 */
 	static async YouTube(url: string): Promise<MettatonStream> {
-		const videoInfo: ytdl.videoInfo | void = await ytdl.getBasicInfo(url, YouTubeAgent.ytdlOptions)
+		const videoInfo: ytdl.videoInfo | void = await ytdl.getInfo(url, YouTubeAgent.ytdlOptions)
 			.then((data) => {
 				return data;
 			})
 			.catch((error: Error) => { throw error; });
 
-		const video: Payload | string = await ytdlex(url, {
-			dumpSingleJson: true,
-			noCheckCertificates: true,
-			noWarnings: true,
-			preferFreeFormats: true,
-			addHeader: ['referer:youtube.com', 'user-agent:googlebot']
-			})
-			.then((output) => {
-				return output;
-			})
-			.catch((error: Error) => { throw error; });
+		const formats = videoInfo.formats;
 
-		if (!video || typeof video === 'string' || !video.formats.length) throw new Error('This video is unavailable.');
-		const bestFormat = chooseBestVideoFormat(video.formats);
+		if (!videoInfo || !formats.length) throw new Error('This video is unavailable.');
+		const bestFormat = chooseBestVideoFormat(formats);
 		if (!bestFormat) throw new Error('Unplayable formats.');
+		
+		return await checkUrl(bestFormat.url).then(async (isAccessible) => {
+			if (isAccessible) {
+				console.log('Proceeding with @distube/ytdl...');
+				return new MettatonStream(bestFormat.url, videoInfo);
+			} else {
+				console.log('Trying with youtube-dl-exec...');
+				const video: Payload | string = await ytdlex(url, {
+					dumpSingleJson: true,
+					noCheckCertificates: true,
+					noWarnings: true,
+					preferFreeFormats: true,
+					addHeader: ['referer:youtube.com', 'user-agent:googlebot']
+					})
+					.then((output) => {
+						return output;
+					})
+					.catch((error: Error) => { throw error; });
+				
+				if (!video || typeof video === 'string' || !video.formats.length) throw new Error('This video is unavailable.');
+				const bestFormat = chooseBestVideoFormat(video.formats);
+				if (!bestFormat) throw new Error('Unplayable formats.');
 
-		return new MettatonStream(bestFormat.url, videoInfo);
+				return new MettatonStream(bestFormat.url, videoInfo);
+			}
+		});
 	}
 
 	type: StreamType = StreamType.OggOpus;
@@ -89,7 +119,7 @@ export class MettatonStream {
 			'-reconnect_delay_max', '5',
 			// https://stackoverflow.com/questions/68209379/error-in-the-pull-function-keepalive-request-failed-for-when-opening-url
 			// There should be a better fix...
-			'-http_persistent', '0',
+			// '-http_persistent', '0',
 
 			// Input
 			'-i', url,
@@ -106,7 +136,6 @@ export class MettatonStream {
 			// See https://github.com/yt-dlp/yt-dlp/pull/10456
 			'-maxrate:a', '200k', '-minrate:a', '48k',
 		];
-
 
 		// if (typeof options.seek === 'number' && options.seek > 0) args.unshift('-ss', options.seek.toString());
 		// if (Array.isArray(options.ffmpegArgs) && options.ffmpegArgs.length) args.push(...options.ffmpegArgs);

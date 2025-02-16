@@ -74,7 +74,7 @@ if (!(fs.existsSync(cookiesPath) && fs.lstatSync(cookiesPath).isFile())) {
 }
 else {
 	const ytCookies = fs.readFileSync(cookiesPath, 'utf8');
-	YouTubeAgent.CreateYTAgent({ cookies: JSON.parse(ytCookies) });
+	YouTubeAgent.CreateYTAgent({ cookies: JSON.parse(ytCookies) , ytdlOptions: {playerClients: ['ANDROID']}});
 }
 
 void lClient.login(process.env.BOT_TOKEN);
