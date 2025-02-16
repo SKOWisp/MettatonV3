@@ -29,7 +29,7 @@ This bot was built using [discord.js](https://discord.js.org/), if you are havin
 
 ### Prerequisites
 
-* [Node.js](https://nodejs.org). I use v18.17.1, but newer versions should work too.
+* [Node.js](https://nodejs.org). I use v22.12.0, but newer versions should work too.
 * FFmpeg
 * Bot token (see above).
 
@@ -38,15 +38,8 @@ This bot was built using [discord.js](https://discord.js.org/), if you are havin
 0. Create your bot on the discord developer portal and add it to a server by modifying and using the following link:
 
 ```
-https://discord.com/api/oauth2/authorize?client_id= < discord id of the bot > &permissions=137543216192&scope=bot%20applications.commands
+https://discord.com/api/oauth2/authorize?client_id=➡️BOT APPLICATION ID⬅️&permissions=137543216192&scope=bot%20applications.commands
 ```
-
-Example: 
-
-```
-https://discord.com/api/oauth2/authorize?client_id=123456789101112131&permissions=137543216192&scope=bot%20applications.commands
-```
-
 
 1. Clone the repo.
 
@@ -63,31 +56,26 @@ npm install
 3. Inside this folder, create a file named '.env' with the following information:
 
 ```
-BOT_TOKEN= < your bot token >
-CLIENT_ID= <discord id of the bot >
-GUILD_ID= < discord id of the server where you'll add the bot >
-MAX_SONGS= < max number of songs that can be added to the queue >
-SEARCH_LIMIT= < search limit for the ytsr module >
-TOLERANCE= < minutes of tolerance before auto-disconnecting >
-DEGEN= < username of person you want to troll >
+BOT_TOKEN=➡️BOT TOKEN⬅️
+CLIENT_ID=➡️BOT APPLICATION ID⬅️
+GUILD_ID=➡️GUILD (SERVER) ID FOR BOT OWNER COMMANDS⬅️
+
+# Default Settings
+MAX_SONGS=150 # Song queue length limit
+SEARCH_LIMIT=20 # Serch limit for ytsr 
+TOLERANCE=180 # Seconds of tolerance before leaving empty vc
+
+# Discord username to which /user will react differently.
+DEGEN=➡️SEE /user COMMAND⬅️ 
 ```
-Example:
-```
-BOT_TOKEN=MTEzMTQ0MDY4MjczNzg2NDgwNw.GtafFR.4SV4PvdHiWZqzIZBIj5LfK3cGW1p68xIScPIPc
-CLIENT_ID=123456789101112131
-GUILD_ID=131211101987654321
-MAX_SONGS=150
-SEARCH_LIMIT=20
-TOLERANCE=3
-DEGEN=skowisp
-```
+
 4. Open a command prompt in the folder and run:
 ```sh
 npm run build
 npm run deploy
 npm run database
 ```
-This will generate a folder called 'dist' in which you'll find a file called 'Bot.js', as well as database.sqlite file that will store each server's voice settings. Run this file to start the bot.
+This will generate a folder called `dist` in which you will find a file called `Bot.js`, as well as the `database.sqlite` file that will store the voice configuration for each server. To start the bot run:
 
 ```sh
 node dist/Bot.js
@@ -100,4 +88,4 @@ Distributed under the MIT License. See [LICENSE](https://github.com/SKOWisp/Mett
 
 ## Authors
 
-* **Román T. Vidal Tamayo** - [GitHub](https://github.com/SKOWisp) - *Owner*
+* **SKOWisp** - [GitHub](https://github.com/SKOWisp) - *Owner*
