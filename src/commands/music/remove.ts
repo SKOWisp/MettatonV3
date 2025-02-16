@@ -1,4 +1,4 @@
-import { GuildMember, SlashCommandBuilder } from 'discord.js';
+import { GuildMember, NewsChannel, PartialGroupDMChannel, SendableChannels, SlashCommandBuilder, TextBasedChannel } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
 module.exports = {
@@ -34,7 +34,7 @@ module.exports = {
 		// Do nothing if there's nothing to do
 		if (pos - 1 > queueLength) {
 			await interaction.reply({ content: 'https://media1.tenor.com/m/TFFBKrvBc_sAAAAd/zoku-owarimonogatari-serpent.gif' });
-			return interaction.channel!.send('*\\*zzZZZzzz...\\** (nadeko doesn\'t have anything to remove)');
+			return (interaction.channel as SendableChannels).send('*\\*zzZZZzzz...\\** (nadeko doesn\'t have anything to remove)');
 		}
 
 		// Call the remove function and save the message
@@ -49,7 +49,7 @@ module.exports = {
 			}
 
 			await interaction.reply({ content: 'https://media1.tenor.com/m/dRpsv_G8zHwAAAAC/monogatari-monogatari-series.gif' });
-			return interaction.channel!.send(info);
+			return (interaction.channel as SendableChannels).send(info);
 		}
 
 		return interaction.reply({ content: `Removed song #${pos}: ${info}.` });

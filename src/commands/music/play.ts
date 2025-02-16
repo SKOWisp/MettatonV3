@@ -1,4 +1,5 @@
 import {
+	DiscordGatewayAdapterCreator,
 	entersState,
 	joinVoiceChannel,
 	VoiceConnectionStatus,
@@ -70,7 +71,7 @@ module.exports = {
 			joinVoiceChannel({
 				channelId: channel.id,
 				guildId: channel.guild.id,
-				adapterCreator: channel.guild.voiceAdapterCreator,
+				adapterCreator: channel.guild.voiceAdapterCreator as DiscordGatewayAdapterCreator,
 				selfDeaf: true,
 			}),
 			interaction.channel!,

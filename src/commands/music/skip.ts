@@ -1,4 +1,4 @@
-import { GuildMember, SlashCommandBuilder } from 'discord.js';
+import { GuildMember, SendableChannels, SlashCommandBuilder } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
 module.exports = {
@@ -36,7 +36,7 @@ module.exports = {
 			serverQueue.eraseQueue();
 			interaction.client.queues.delete(interaction.guildId!);
 			await interaction.reply({ content: 'https://media.tenor.com/X5v7RZNp8AwAAAAC/monogatari-monogatari-series.gif' });
-			return interaction.channel!.send('why add songs only to skip them?!!?!');
+			return (interaction.channel as SendableChannels).send('why add songs only to skip them?!!?!');
 		}
 
 		serverQueue.skip(skips);

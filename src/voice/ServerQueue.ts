@@ -9,7 +9,7 @@
 	VoiceConnectionDisconnectReason,
 	VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { TextBasedChannel, Message } from 'discord.js';
+import { TextBasedChannel, Message, SendableChannels } from 'discord.js';
 import { promisify } from 'util';
 import { MettatonStream, SongData, safeSong } from '.';
 import { MettatonMessage, VoiceSettings } from '..';
@@ -137,7 +137,7 @@ export class ServerQueue {
 				console.log(`Now playing: ${newResource.metadata.name}`);
 
 				const pMessage = await MettatonMessage.createPlayMessage(newResource.metadata);
-				this.playMessage = await this.textChannel.send(pMessage).catch(console.warn);
+				this.playMessage = await (this.textChannel as SendableChannels).send(pMessage).catch(console.warn);
 			}
 		});
 
@@ -146,7 +146,7 @@ export class ServerQueue {
 			// Log that there were problems streaming the song
 			const info = (error.resource as AudioResource<SongData>);
 			console.error(`Error while streaming "${info.metadata.name}": \n${error.message}`);
-			this.textChannel.send(`Error while streaming ${info.metadata.name}`).catch(console.warn);
+			(this.textChannel as SendableChannels).send(`Error while streaming ${info.metadata.name}`).catch(console.warn);
 
 			this.processQueue();
 		});
@@ -234,7 +234,7 @@ export class ServerQueue {
 
 		// Send bye message
 		if (sendMessage) {
-			this.textChannel.send('Disconnecting...');
+			(this.textChannel as SendableChannels).send('Disconnecting...');
 		}
 
 		// Erase queue and stop audio player
@@ -295,7 +295,7 @@ export class ServerQueue {
 				// eslint-disable-next-line no-undef
 				mttstream.stream.on('error', (error: NodeJS.ErrnoException) => {
 					if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
-					this.textChannel.send(`Error while streaming "${nextSong!.name}": \n${error}`).catch(console.warn);
+					(this.textChannel as SendableChannels).send(`Error while streaming "${nextSong!.name}": \n${error}`).catch(console.warn);
 					throw error;
 				});
 
@@ -309,7 +309,7 @@ export class ServerQueue {
 			})
 			.catch(error => {
 				console.error(`Error while creating audio resource from "${nextSong!.name}": \n${error}`);
-				this.textChannel.send(`Error while creating audio resource from "${nextSong!.name}": \n${error}`).catch(console.warn);
+				(this.textChannel as SendableChannels).send(`Error while creating audio resource from "${nextSong!.name}": \n${error}`).catch(console.warn);
 
 				this.queueLock = false;
 				this.processQueue();

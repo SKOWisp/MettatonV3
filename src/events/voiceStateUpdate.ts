@@ -1,4 +1,4 @@
-import { Collection, Events, GuildMember, VoiceState } from 'discord.js';
+import { Collection, Events, GuildMember, SendableChannels, VoiceState } from 'discord.js';
 import { ServerQueue, LooseClient } from '..';
 
 module.exports = {
@@ -59,6 +59,6 @@ async function disconnectBot(serverQueue: ServerQueue, queues: Collection<string
 	queues.delete(serverQueue.voiceConnection.joinConfig.guildId);
 
 	// NADEKO
-	await serverQueue.textChannel.send({ content: 'https://media.tenor.com/doD0ciSXEFEAAAAC/monogatari-nadeko-sengoku.gif' });
-	serverQueue.textChannel.send('Um...i-i should go now. G-Goodbye!');
+	await (serverQueue.textChannel as SendableChannels).send({ content: 'https://media.tenor.com/doD0ciSXEFEAAAAC/monogatari-nadeko-sengoku.gif' });
+	(serverQueue.textChannel as SendableChannels).send('Um...i-i should go now. G-Goodbye!');
 }

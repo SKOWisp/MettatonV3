@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SendableChannels, SlashCommandBuilder } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 import { splitString } from '../..';
 
@@ -51,15 +51,15 @@ module.exports = {
 		// Reply
 		interaction.reply(`**${guild.name}'s emojis: **`);
 		for (const msg of firstMessages) {
-			interaction.channel!.send(msg);
+			(interaction.channel as SendableChannels).send(msg);
 		}
 
 		if (showIDs) {
 			// eslint-disable-next-line no-useless-escape
 			const secondMessages = splitString(info[1], { prepend: '\`\`\`\n', append: '\n\`\`\`' });
-			interaction.channel!.send('** IDs: **');
+			(interaction.channel as SendableChannels).send('** IDs: **');
 			for (const msg of secondMessages) {
-				interaction.channel!.send(msg);
+				(interaction.channel as SendableChannels).send(msg);
 			}
 		}
 	},
