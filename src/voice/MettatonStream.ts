@@ -115,11 +115,11 @@ export class MettatonStream {
 			'-reconnect', '1',
 			'-reconnect_streamed', '1',
 			'-reconnect_on_network_error', '1',
-			'-reconnect_on_http_error', '4xx,5xx',
+			'-reconnect_on_http_error', '5xx',
 			'-reconnect_delay_max', '5',
 			// https://stackoverflow.com/questions/68209379/error-in-the-pull-function-keepalive-request-failed-for-when-opening-url
 			// There should be a better fix...
-			// '-http_persistent', '0',
+			'-http_persistent', '0',
 
 			// Input
 			'-i', url,
@@ -149,9 +149,15 @@ export class MettatonStream {
 
 		// FFmpeg debug
 		(<any> this.stream).process.stderr.on('data', (chunk: any) => {
-			const info = chunk.toString();
+			const info: string = chunk.toString();
 			// if (info.startsWith('size=')) return;
-			console.error('FFmpeg: ' + info.replace(/\n+$/, ''));
+			
+			if (info.slice(1,5) == 'http' && info.includes('HTTP error 403 Forbidden')) {
+				console.warn('lmao')
+			}
+
+			const msg = 'FFmpeg: ' + info.replace(/\n+$/, '')
+			console.error(msg);
 		});
 	}
 }

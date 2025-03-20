@@ -31,7 +31,7 @@
     "sqlite3": "^5.1.7",
     "url-parse": "^1.5.10",
     "validator": "^13.11.0",
-    "youtube-dl-exec": "^3.0.13",
+    "youtube-dl-exec": "^3.0.19",
     "ytpl": "^2.3.0"
   },
   "devDependencies": {
