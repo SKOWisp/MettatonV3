@@ -1,4 +1,4 @@
-import { SendableChannels, SlashCommandBuilder } from 'discord.js';
+import { SendableChannels, SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 import { splitString } from '../..';
 
@@ -11,10 +11,11 @@ module.exports = {
 				.setDescription('all/anim/static')
 				.setRequired(false)),
 
-	execute(interaction: LooseCommandInteraction) {
+	execute(interaction: LooseCommandInteraction & ChatInputCommandInteraction<'cached'>) {
 		const guild = interaction.guild!;
 
 		// Get flags
+		interaction.command?.options
 		const flag = (interaction.options as any).getString('flag');
 
 		let showIDs: boolean = false;

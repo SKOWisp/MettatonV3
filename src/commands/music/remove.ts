@@ -1,4 +1,4 @@
-import { GuildMember, NewsChannel, PartialGroupDMChannel, SendableChannels, SlashCommandBuilder, TextBasedChannel } from 'discord.js';
+import { GuildMember, ChatInputCommandInteraction, SendableChannels, SlashCommandBuilder } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 			option.setName('position')
 				.setDescription('Queue position of the song to remove.')
 				.setRequired(true)),
-	async execute(interaction: LooseCommandInteraction) {
+	async execute(interaction: LooseCommandInteraction & ChatInputCommandInteraction<'cached'>) {
 
 		const channel = (interaction.member as GuildMember).voice.channel;
 		const serverQueue = interaction.client.queues.get(interaction.guildId!);

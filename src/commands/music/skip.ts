@@ -1,4 +1,4 @@
-import { GuildMember, SendableChannels, SlashCommandBuilder } from 'discord.js';
+import { GuildMember, SendableChannels, SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 			option.setName('skips')
 				.setDescription('# of songs to skip.')
 				.setRequired(false)),
-	async execute(interaction: LooseCommandInteraction) {
+	async execute(interaction: LooseCommandInteraction & ChatInputCommandInteraction<'cached'>) {
 
 		const channel = (interaction.member as GuildMember).voice.channel;
 		const serverQueue = interaction.client.queues.get(interaction.guildId!);
