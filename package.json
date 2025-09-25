@@ -1,14 +1,14 @@
 {
   "name": "mettatonv3",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0",
   "type": "module",
   "description": "Hopefully a better version of the Mettaton Discord bot.",
   "main": "src/Bot.ts",
   "scripts": {
     "start": "node --loader ts-node/esm src/Bot.ts",
-    "deploy": "node ./dist/DeployCommands.js",
-    "database": "node --loader ts-node/esm src/meta/DataBaseInit.ts -f",
-    "undeploy": "node --loader ts-node/esm test/Delete-Commands.ts",
+    "deploy": "node dist/meta/DeployCommands.js",
+    "database": "node dist/meta/DataBaseInit.js -f",
+    "undeploy": "node test/Delete-Commands.js",
     "lint": "eslint --ext .ts .",
     "lint:fix": "eslint --fix --ext .ts .",
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json"

@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename); // WTF
 
 // Grab all the command files from the commands directory
-const foldersPath = path.join(__dirname, './commands');
+const foldersPath = path.join(__dirname, '../commands');
 const generalCommandFolders = fs.readdirSync(foldersPath);
 
 // Remove bot owner commands directory

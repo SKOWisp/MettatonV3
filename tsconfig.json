@@ -41,6 +41,5 @@
 		"node_modules",
 		"dist",
 		"test",
-		"meta/*"
 	]
 } 
