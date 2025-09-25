@@ -3,8 +3,13 @@ import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
 
+// OK
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename); // WTF
+
 // Grab all the command files from the commands directory
-const foldersPath = path.join(import.meta.url, 'commands');
+const foldersPath = path.join(__dirname, './commands');
 const generalCommandFolders = fs.readdirSync(foldersPath);
 
 // Remove bot owner commands directory
@@ -16,7 +21,7 @@ const ownerCommandFolders = generalCommandFolders.splice(generalCommandFolders.i
  * @returns {never[]} Array of commands
  * @private
  */
-function ReadCommandFolders(folders: string[]): never[] {
+async function ReadCommandFolders(folders: string[]): Promise<never[]> {
 	const commands: never[] = [];
 
 	for (const folder of folders) {
@@ -24,12 +29,14 @@ function ReadCommandFolders(folders: string[]): never[] {
 
 		// Grab all the command files from the commands directoryr
 		const commandsPath = path.join(foldersPath, folder);
-		const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
+		const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 		// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 		for (const file of commandFiles) {
-			const filePath = path.join(commandsPath, file);
-			const command = require(filePath);
+			let filePath = path.join(commandsPath, file);
+			const imported = await import(filePath);
+			const command = imported.default;
+			
 			if ('data' in command && 'execute' in command) {
 				commands.push(command.data.toJSON() as never);
 			}
@@ -42,8 +49,8 @@ function ReadCommandFolders(folders: string[]): never[] {
 	return commands
 }
 
-const generalCommands = ReadCommandFolders(generalCommandFolders);
-const ownerCommands = ReadCommandFolders(ownerCommandFolders);
+const generalCommands = await ReadCommandFolders(generalCommandFolders);
+const ownerCommands = await ReadCommandFolders(ownerCommandFolders);
 
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(process.env.BOT_TOKEN!);
