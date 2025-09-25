@@ -1,3 +1,3 @@
-export { MettatonMessage } from './MettatonMessage';
-export * from './utils';
-export * from './handleQuery';
+export { MettatonMessage } from './MettatonMessage.js';
+export * from './utils.js';
+export * from './handleQuery.js';

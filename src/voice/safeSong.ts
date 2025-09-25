@@ -56,5 +56,5 @@ export async function safeSong(query: string, maxDuration: number = 0): Promise<
 	const vid = videos[0];
 	console.log('Found: ' + vid.name);
 
-	return new SongData({ name: vid.name, urlYT: vid.url }, 'youtube');
+	return new SongData({ title: vid.name, urlYT: vid.url }, 'youtube');
 }

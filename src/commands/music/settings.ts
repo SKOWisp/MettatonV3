@@ -4,7 +4,7 @@ import { MettatonMessage } from '../..';
 
 import 'dotenv/config';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('settings')
 		.setDescription('List or modify Mettaton server settings.')

@@ -11,11 +11,13 @@ import { matches, shuffle } from '.';
 import validator from 'validator';
 import URLParse from 'url-parse';
 import ytpl from 'ytpl';
-import ytdl from '@distube/ytdl-core';
+import { YouTubeAgent } from '../voice/plugins';
 
 // spotify-url-info modules
-const fetch = require('isomorphic-unfetch');
-const { getData } = require('spotify-url-info')(fetch);
+import fetch from 'isomorphic-unfetch'
+// Inside an async context (or top-level if your Node version supports it)
+// @ts-ignore
+const { getData } = (await import('spotify-url-info')).default(fetch);
 
 /**
  * Processes a query into a SongData object or a string in case of error
@@ -57,10 +59,12 @@ async function ytUrl(query: string, doShuffle: boolean = true): Promise<SongData
 	const pathname = new URL(query).pathname;
 
 	if (pathname === '/watch') {
-		const song: SongData[] | string = await ytdl.getBasicInfo(query)
+		const nav_end = await YouTubeAgent.innertube.resolveURL(query)
+
+		const song: SongData[] | string = await YouTubeAgent.innertube.getBasicInfo(nav_end.payload.videoId)
 			.then(data => {
-				const vid = data.videoDetails;
-				return [new SongData({ name: vid.title, urlYT: vid.video_url }, 'youtube')];
+				const vid = data;
+				return [new SongData({ title: vid.basic_info.title!, urlYT: vid.basic_info.url_canonical! }, 'youtube')];
 			})
 			.catch((err) => {
 				console.warn(err);
@@ -73,7 +77,7 @@ async function ytUrl(query: string, doShuffle: boolean = true): Promise<SongData
 			.then(data => {
 				const songs: SongData[] = data.items.map(video => {
 					// Return song data object per item
-					return new SongData({ name: video.title, urlYT: video.shortUrl }, 'youtube');
+					return new SongData({ title: video.title, urlYT: video.shortUrl }, 'youtube');
 				});
 				return songs;
 			})

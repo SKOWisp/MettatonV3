@@ -13,7 +13,7 @@ import {
 import validator from 'validator';
 import URLParse from 'url-parse';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('add')
 		.setDescription('Adds a SINGLE song to the beginning of the queue.')
@@ -65,7 +65,7 @@ module.exports = {
 			serverQueue.enqueue([song], true);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
-			return interaction.followUp(`${song.name} is now next in the queue.`);
+			return interaction.followUp(`${song.title} is now next in the queue.`);
 		}
 
 		// Parse query as a URL for convenience
@@ -86,7 +86,7 @@ module.exports = {
 			serverQueue.enqueue(song, true);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
-			return interaction.followUp(`${song[0].name} is now next in the queue.`);
+			return interaction.followUp(`${song[0].title} is now next in the queue.`);
 		}
 
 		// Query is a spotify link
@@ -97,7 +97,7 @@ module.exports = {
 			serverQueue.enqueue(song, true);
 			// In case /add is used when nothing is playing
 			if (!serverQueue.currentSong) serverQueue.enqueue();
-			return interaction.followUp(`${song[0].name} is now next in the queue.`);
+			return interaction.followUp(`${song[0].title} is now next in the queue.`);
 		}
 
 		return interaction.followUp('Something went terribly wrong');

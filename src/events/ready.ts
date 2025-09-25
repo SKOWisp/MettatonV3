@@ -2,7 +2,7 @@ import { ActivityType, Events } from 'discord.js';
 import { LooseClient } from '..';
 import { GuildSettings } from '..';
 
-module.exports = {
+export default {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client: LooseClient) {

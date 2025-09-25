@@ -2,7 +2,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, SendableChannels } fr
 import 'dotenv/config';
 
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('user')
 		.setDescription('Returns username.'),

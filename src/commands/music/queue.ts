@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('queue')
 		.setDescription('Displays the server\'s queue.'),
@@ -17,10 +17,10 @@ module.exports = {
 		let i = 1;
 		const titles = serverQueue.queue.map(track => {
 			i++;
-			return i + '.- ' + track.name;
+			return i + '.- ' + track.title;
 		});
 
-		const numSongs = titles.unshift('**CURRENT SONG:** ' + (serverQueue.currentSong ? serverQueue.currentSong.name : '---'));
+		const numSongs = titles.unshift('**CURRENT SONG:** ' + (serverQueue.currentSong ? serverQueue.currentSong.title : '---'));
 		let description = titles.slice(0, 19).join('\n');
 		if (numSongs > 19) {
 			const difference = numSongs - 19;

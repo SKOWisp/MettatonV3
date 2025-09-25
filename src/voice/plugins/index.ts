@@ -1,1 +1,1 @@
-export { YouTubeAgent } from './YouTubeAgent'
+export { YouTubeAgent } from './YouTubeAgent.js'

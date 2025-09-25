@@ -1,7 +1,7 @@
 import { GuildMember, SendableChannels, SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('skip')
 		.setDescription('Skips a # of songs in the queue.')

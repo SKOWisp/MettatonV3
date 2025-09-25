@@ -1,7 +1,7 @@
 import { Events, GuildMember } from 'discord.js';
 import { LooseCommandInteraction, GuildSettings } from '..';
 
-module.exports = {
+export default {
 	name: Events.InteractionCreate,
 	async execute(interaction: LooseCommandInteraction) {
 		/**

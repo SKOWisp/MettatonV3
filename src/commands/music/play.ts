@@ -7,7 +7,7 @@ import {
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { SongData, ServerQueue, LooseCommandInteraction, handleQuery, VoiceSettings } from '../..';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('play')
 		.setDescription('Looks up a query and adds it to the queue.')
@@ -103,9 +103,9 @@ module.exports = {
 // Reply to the /play interaction depending on the amount of songs added.
 function enqueueReply(interaction: LooseCommandInteraction, songs: SongData[], quantity: number) {
 	if (quantity === 1) {
-		interaction.followUp(`${songs[0].name} has been added to the queue.`);
+		interaction.followUp(`${songs[0].title} has been added to the queue.`);
 	}
 	else {
-		interaction.followUp((`${songs[0].name}\n + ${quantity - 1} more song(s)  have been added to the queue.`));
+		interaction.followUp((`${songs[0].title}\n + ${quantity - 1} more song(s)  have been added to the queue.`));
 	}
 }

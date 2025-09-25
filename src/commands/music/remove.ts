@@ -1,7 +1,7 @@
 import { GuildMember, ChatInputCommandInteraction, SendableChannels, SlashCommandBuilder } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('remove')
 		.setDescription('Removes a song from the /queue.')

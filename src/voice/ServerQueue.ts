@@ -122,7 +122,7 @@ export class ServerQueue {
 
 				// Log that the previous song ended
 				const oldResource = (oldState.resource as AudioResource<SongData>);
-				console.log(`Song ${oldResource.metadata.name} has ended`);
+				console.log(`Song ${oldResource.metadata.title} has ended`);
 				if (this.playMessage) this.playMessage.delete().catch(console.warn);
 				this.currentSong_ = null;
 
@@ -134,7 +134,7 @@ export class ServerQueue {
 				// Log the that a new song has begun
 				const newResource = (newState.resource as AudioResource<SongData>);
 				this.currentSong_ = newResource.metadata;
-				console.log(`Now playing: ${newResource.metadata.name}`);
+				console.log(`Now playing: ${newResource.metadata.title}`);
 
 				const pMessage = await MettatonMessage.createPlayMessage(newResource.metadata);
 				this.playMessage = await (this.textChannel as SendableChannels).send(pMessage).catch(console.warn);
@@ -145,8 +145,8 @@ export class ServerQueue {
 		this.audioPlayer.on('error', error => {
 			// Log that there were problems streaming the song
 			const info = (error.resource as AudioResource<SongData>);
-			console.error(`Error while streaming "${info.metadata.name}": \n${error.message}`);
-			(this.textChannel as SendableChannels).send(`Error while streaming ${info.metadata.name}`).catch(console.warn);
+			console.error(`Error while streaming "${info.metadata.title}": \n${error.message}`);
+			(this.textChannel as SendableChannels).send(`Error while streaming ${info.metadata.title}`).catch(console.warn);
 
 			this.processQueue();
 		});
@@ -215,7 +215,7 @@ export class ServerQueue {
 		}
 
 		// Remove song in /queue return name of the removed song
-		const songName = this.queue_[pos - 2].name;
+		const songName = this.queue_[pos - 2].title;
 		this.queue_.splice(pos - 2, 1);
 		return songName;
 	}
@@ -278,11 +278,11 @@ export class ServerQueue {
 
 		// If song doesn't have an id (e.g. the song was retrieved from spotify), look it up
 		if (!nextSong.urlYT) {
-			const video = await safeSong(nextSong.name);
+			const video = await safeSong(nextSong.title);
 
 			// If this fails, try next song
 			if (typeof video === 'string') {
-				console.error(`Couldn't find' "${nextSong!.name}"`);
+				console.error(`Couldn't find' "${nextSong!.title}"`);
 				this.queueLock = false;
 				return this.processQueue();
 			}
@@ -295,7 +295,7 @@ export class ServerQueue {
 				// eslint-disable-next-line no-undef
 				mttstream.stream.on('error', (error: NodeJS.ErrnoException) => {
 					if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
-					(this.textChannel as SendableChannels).send(`Error while streaming "${nextSong!.name}": \n${error}`).catch(console.warn);
+					(this.textChannel as SendableChannels).send(`Error while streaming "${nextSong!.title}": \n${error}`).catch(console.warn);
 					throw error;
 				});
 
@@ -308,8 +308,8 @@ export class ServerQueue {
 				this.queueLock = false;
 			})
 			.catch(error => {
-				console.error(`Error while creating audio resource from "${nextSong!.name}": \n${error}`);
-				(this.textChannel as SendableChannels).send(`Error while creating audio resource from "${nextSong!.name}": \n${error}`).catch(console.warn);
+				console.error(`Error while creating audio resource from "${nextSong!.title}": \n${error}`);
+				(this.textChannel as SendableChannels).send(`Error while creating audio resource from "${nextSong!.title}": \n${error}`).catch(console.warn);
 
 				this.queueLock = false;
 				this.processQueue();

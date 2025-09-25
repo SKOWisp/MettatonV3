@@ -2,7 +2,7 @@ import { SendableChannels, SlashCommandBuilder, ChatInputCommandInteraction } fr
 import { LooseCommandInteraction } from '../..';
 import { splitString } from '../..';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('emoji')
 		.setDescription('Prints server\'s emojis.')

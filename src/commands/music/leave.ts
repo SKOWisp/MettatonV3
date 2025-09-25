@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, GuildMember } from 'discord.js';
 import { LooseCommandInteraction } from '../..';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('leave')
 		.setDescription('Stops playback and kicks the bot from the vc.'),

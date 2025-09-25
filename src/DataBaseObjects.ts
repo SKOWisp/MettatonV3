@@ -9,8 +9,7 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 // Load models
-const extension = __filename.split(/(.)/g).pop();
-const GuildSettings: ModelStatic<IGuildSettings> = require('./models/GuildSettings' + extension)(sequelize);
+const GuildSettings: ModelStatic<IGuildSettings> = (await import('./models/GuildSettings.js')).default(sequelize);
 
 /*
 	We 'objectify' the db data.

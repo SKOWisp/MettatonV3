@@ -48,11 +48,10 @@ export interface IGuildSettings extends Model<InferAttributes<IGuildSettings>, I
 	filter: CreationOptional<FilterSettings>;
 }
 
-module.exports = (sequelize: Sequelize) => {
+export default (sequelize: Sequelize) => {
 	return (sequelize.define<IGuildSettings>('GuildSettings', {
 		guild_id: {
 			type: DataTypes.STRING,
-			// Value must be unique and can't be null
 			primaryKey: true,
 		},
 		voice: {

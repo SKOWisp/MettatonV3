@@ -1,7 +1,7 @@
 import { Collection, Events, GuildMember, SendableChannels, VoiceState } from 'discord.js';
 import { ServerQueue, LooseClient } from '..';
 
-module.exports = {
+export default {
 	name: Events.VoiceStateUpdate,
 	once: false,
 	// eslint-disable-next-line no-unused-vars

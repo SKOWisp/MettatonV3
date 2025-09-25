@@ -1,12 +1,15 @@
 import { StreamType } from '@discordjs/voice';
-import { FFmpeg } from 'prism-media';
 
-import ytdl from '@distube/ytdl-core';
-import { Payload, Format } from 'youtube-dl-exec';
-import ytdlex from 'youtube-dl-exec';
+import prism from 'prism-media';
+const { FFmpeg } = prism;
 
 import { SongData } from '.';
 import { YouTubeAgent } from './plugins';
+
+import { VideoInfo } from 'youtubei.js/dist/src/parser/youtube';
+import { MediaInfo } from 'youtubei.js/dist/src/core/mixins';
+import { FormatOptions } from 'youtubei.js/dist/src/types';
+import { Format } from 'youtubei.js/dist/src/parser/misc';
 
 interface StreamOptions {
 	seek?: number;
@@ -18,12 +21,12 @@ interface StreamOptions {
 export const chooseBestVideoFormat = (formats: Format[], isLive = false) => {
 	formats = formats as Format[]
 		
-	let filter = (format: Format) => format.acodec != 'none';
-	if (isLive) filter = (format: Format) => format.acodec != 'none' && !format.acodec && format.format.includes('m3u8');
+	let filter = (format: Format) => format.has_audio;
+	// if (isLive) filter = (format: Format) => format.acodec != 'none' && !format.acodec && format.format.includes('m3u8');
 	formats = formats
 		.filter(filter)
-		.sort((a, b) => Number(b.abr) - Number(a.abr) || Number(a.tbr) - Number(b.tbr));
-	return formats.find(format => format.vcodec == 'none') || formats.sort((a, b) => Number(b.tbr) - Number(a.tbr))[0];
+		.sort((a, b) => Number(b.audio_sample_rate) - Number(a.audio_sample_rate) || Number(a.bitrate) - Number(b.bitrate));
+	return formats.find(format => !format.has_video) || formats.sort((a, b) => Number(b.bitrate) - Number(a.bitrate))[0];
 };
 
 
@@ -36,33 +39,36 @@ export class MettatonStream {
 	 * @private
 	 */
 	static async YouTube(url: string): Promise<MettatonStream> {
-		const videoInfo: ytdl.videoInfo | void = await ytdl.getInfo(url, YouTubeAgent.ytdlOptions)
+		const nav_end = await YouTubeAgent.innertube.resolveURL(url)
+
+		YouTubeAgent.innertube.getInfo
+		const videoInfo: VideoInfo | void = await YouTubeAgent.innertube.getBasicInfo(nav_end.payload.videoId)
 			.then((data) => {
 				return data;
 			})
-			.catch((error: Error) => { throw error; });
-		
-		const video: Payload | string = await ytdlex(url, {
-			dumpSingleJson: true,
-			noCheckCertificates: true,
-			noWarnings: true,
-			preferFreeFormats: true,
-			addHeader: ['referer:youtube.com', 'user-agent:googlebot']
-			})
-			.then((output) => {
-				return output;
-			})
-			.catch((error: Error) => { throw error; });
-		
-		if (!video || typeof video === 'string' || !video.formats.length) throw new Error('This video is unavailable.');
-		const bestFormat = chooseBestVideoFormat(video.formats);
-		if (!bestFormat) throw new Error('Unplayable formats.');
+			.catch((error: Error) => { 
+				console.error("Innertube Error with:", url);
+				throw error; 
+			});
 
-		return new MettatonStream(bestFormat.url, videoInfo);
+		const options: FormatOptions = {
+			type: "audio",
+			quality: "best",
+		};
+		
+		if (!videoInfo.streaming_data) throw new Error('This video is unavailable.');
+		const bestFormat = chooseBestVideoFormat(videoInfo.streaming_data?.adaptive_formats);
+		if (!bestFormat) throw new Error('Unplayable formats.');
+		// console.log(bestFormat)
+		const stream_url = YouTubeAgent.innertube.session.player?.decipher(bestFormat.url)
+		if (!stream_url) throw new Error('Video stream could not be deciphered.');
+		// console.log(stream_url)
+			
+		return new MettatonStream(stream_url, videoInfo);
 	}
 
 	type: StreamType = StreamType.OggOpus;
-	stream: FFmpeg;
+	stream: any;
 	url: string;
 	songdata: SongData;
 
@@ -72,7 +78,7 @@ export class MettatonStream {
      * @param {StreamOptions} data Video metadata.
      * @private
 	 */
-	private constructor(url: string, data: ytdl.videoInfo) {
+	private constructor(url: string, data: MediaInfo) {
 		/**
 		 * Stream URL
 		 * @type {string}

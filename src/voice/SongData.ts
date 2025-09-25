@@ -1,18 +1,19 @@
-import ytdl from '@distube/ytdl-core';
+import { MediaInfo } from "youtubei.js/dist/src/core/mixins";
+import { VideoInfo } from "youtubei.js/dist/src/parser/youtube";
 
 interface BasicYTData {
-	name: string;
+	title: string;
 	urlYT: string;
 }
 
 export class SongData {
 	// The only real requirement is a string that can be looked-up later
-	public name!: string;
+	public title!: string;
 	public source!: string;
 	public urlYT?: string;
 	public streamURL?: string;
 	public author!: {
-		name?: string,
+		name: string,
 		pageURL?: string,
 		avatarURL?: string,
 	};
@@ -21,7 +22,7 @@ export class SongData {
 
 	constructor(
 		info:
-			ytdl.videoInfo |
+			MediaInfo |
 			BasicYTData |
 			string,
 		source: string,
@@ -34,31 +35,37 @@ export class SongData {
 
 		// Don't judge me
 		if (this.source === 'ytdl') {
-			this._patchYTDL(info as ytdl.videoInfo);
+			this._patchInnertube(info as MediaInfo);
 		}
 		else if (this.source === 'youtube') {
-			this.name = (info as BasicYTData).name;
+			this.title = (info as BasicYTData).title;
 			this.urlYT = (info as BasicYTData).urlYT;
 		}
 		else {
-			this.name = (info as string);
+			this.title = (info as string);
 		}
 
 	}
 
-	_patchYTDL(i: ytdl.videoInfo) {
-		const details = i.videoDetails;
+	_patchInnertube(i: MediaInfo) {
+		const details = i.basic_info
+		// console.log(details)
+		this.title = details.title!
+		this.urlYT = `https://www.youtube.com/watch?v=${details.id}`
 
-		this.name = details.title;
-		this.urlYT = details.video_url;
-		this.author = {
-			name: details.author.name,
-			pageURL: details.author.user_url,
-			avatarURL: (details.author.thumbnails) ? details.author.thumbnails[0].url : undefined,
-		};
-
-		const bestThumbnail = details.thumbnails.filter(t => t.width < 336).pop();
+		const author = (i as VideoInfo).secondary_info?.owner?.author
+		if (author) {
+			this.author = { 
+				name: author.name, 
+				pageURL: author.url, 
+				avatarURL: author.best_thumbnail?.url
+			};
+		} else {
+			this.author = { name: i.basic_info.author ? i.basic_info.author : 'HOW'}
+		}
+		
+		const bestThumbnail = details.thumbnail?.filter(t => t.width < 336)[0];
 		this.thumnailURL = bestThumbnail!.url;
-		this.duration = details.lengthSeconds;
+		this.duration = details.duration?.toString();
 	}
 }

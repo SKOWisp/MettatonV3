@@ -1,11 +1,11 @@
 {
 	"compilerOptions": {
 		"target": "ESNext",
-		"module": "commonjs",
+		"module": "ESNext",
+        "moduleResolution": "Node",
 		"rootDir": "./src/",
 		"outDir": "./dist/",
 		"strict": true,
-		"moduleResolution": "node",
 		"importHelpers": true,
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
@@ -20,6 +20,17 @@
 		"sourceMap": false,
 		"baseUrl": "./"
 	},
+	"ts-node": {
+         "esm": true
+    },
+	"tsc-alias": {
+    "verbose": false,
+    "resolveFullPaths": true,
+    "fileExtensions": {
+      "inputGlob": "{js,jsx,mjs}",
+      "outputCheck": ["js", "json", "jsx", "mjs"]
+    }
+  	},
 	"files": [
 		"src/Bot.ts"
 	],

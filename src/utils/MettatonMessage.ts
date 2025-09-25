@@ -65,11 +65,11 @@ export class MettatonMessage {
 		const content = emoji + ' ** Now playing: ** ' + emoji;
 
 
-		let name = metadata.name;
+		let name = metadata.title;
 
 		// Shorten the YT video title if needed
-		if (metadata.name.length > 37) {
-			let parts = metadata.name.split(/[-|]|(?<=\s)by(?=\s)/g);
+		if (metadata.title.length > 37) {
+			let parts = metadata.title.split(/[-|]|(?<=\s)by(?=\s)/g);
 
 			parts = parts.map(p => p.trim());
 			name = parts.join('\n');
@@ -81,11 +81,7 @@ export class MettatonMessage {
 		 */
 		let embeds: any = {
 			color: hexColor ? hexColor : 0xfdfdfd,
-			author: {
-				name: `${metadata.author.name}`,
-				iconURL: `${metadata.author.avatarURL}`,
-				url: `${metadata.author.pageURL}`,
-			},
+			author: metadata.author ,
 			description: `[\`${name}\`](${metadata.urlYT}) \n `,
 			image: {
 				url: `${metadata.thumnailURL}`,
