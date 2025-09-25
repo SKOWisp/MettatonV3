@@ -4,7 +4,7 @@ import { ServerQueue, LooseClient } from '..';
 export default {
 	name: Events.VoiceStateUpdate,
 	once: false,
-	// eslint-disable-next-line no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async execute(oldState: VoiceState, _: VoiceState) {
 		/**
 		 * Auto-disconnects bot from voice channel when no members present

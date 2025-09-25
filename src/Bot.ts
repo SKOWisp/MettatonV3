@@ -82,8 +82,7 @@ const innertubeOptions: SessionOptions =  {
 			cache: new UniversalCache(false), 
 			player_id: '0004de42',
 			generate_session_locally: true, // Better performance?
-			client_type: ClientType.ANDROID // Default
-			// 
+			client_type: ClientType.ANDROID 
 			};
 
 const cookiesPath = path.join(settingsPath, 'cookies.json');

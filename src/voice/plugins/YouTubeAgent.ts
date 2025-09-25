@@ -1,10 +1,5 @@
 import { Innertube, SessionOptions } from 'youtubei.js';
-import { checkInvalidKey } from '../../utils';
-
-async function getYouTube() {
-  const mod = await import('youtubei.js');
-  return mod.default ?? mod;
-}
+// import { checkInvalidKey } from '../../utils';
 
 
 export type InnertubeOptions = {
@@ -49,6 +44,7 @@ export class YouTubeAgent {
 	*/
 }
 
+/*
 const clone = <T>(obj: T): T => {
 	const result: T = <T>(Array.isArray(obj) ? [] : {});
 	for (const key in obj) {
@@ -56,4 +52,4 @@ const clone = <T>(obj: T): T => {
 	}
 	return result;
 };
-
+*/

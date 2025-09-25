@@ -9,7 +9,12 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 	storage: 'database.sqlite',
 });
 
-require('./models/GuildSettings.ts')(sequelize);
+
+
+// @ts-expect-error -- No types available
+import GuildSettingsInit from './models/GuildSettings.ts';
+
+GuildSettingsInit(sequelize);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // Grab all the command files from the commands directory
-const foldersPath = path.join(__dirname, 'commands');
+const foldersPath = path.join(import.meta.url, 'commands');
 const generalCommandFolders = fs.readdirSync(foldersPath);
 
 // Remove bot owner commands directory

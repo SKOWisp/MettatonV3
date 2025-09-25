@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { StreamType } from '@discordjs/voice';
 
 import prism from 'prism-media';
@@ -41,7 +42,6 @@ export class MettatonStream {
 	static async YouTube(url: string): Promise<MettatonStream> {
 		const nav_end = await YouTubeAgent.innertube.resolveURL(url)
 
-		YouTubeAgent.innertube.getInfo
 		const videoInfo: VideoInfo | void = await YouTubeAgent.innertube.getBasicInfo(nav_end.payload.videoId)
 			.then((data) => {
 				return data;
@@ -119,6 +119,7 @@ export class MettatonStream {
 		 * @type {FFmpeg}
 		 */
 		this.stream = new FFmpeg({ args, shell: false });
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		(<any> this.stream)._readableState && ((<any> this.stream)._readableState.highWaterMark = 1 << 25);
 
 		// FFmpeg debug

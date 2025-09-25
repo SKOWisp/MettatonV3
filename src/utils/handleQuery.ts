@@ -16,7 +16,7 @@ import { YouTubeAgent } from '../voice/plugins';
 // spotify-url-info modules
 import fetch from 'isomorphic-unfetch'
 // Inside an async context (or top-level if your Node version supports it)
-// @ts-ignore
+// @ts-expect-error -- No types available
 const { getData } = (await import('spotify-url-info')).default(fetch);
 
 /**

@@ -1,5 +1,5 @@
 import { Sequelize, ModelStatic } from 'sequelize';
-import { IGuildSettings, VoiceSettings, FilterSettings } from '.';
+import { IGuildSettings, VoiceSettings, FilterSettings } from '../src/index.js';
 
 const sequelize = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
@@ -9,7 +9,7 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 });
 
 // Load models
-const GuildSettings: ModelStatic<IGuildSettings> = (await import('./models/GuildSettings.js')).default(sequelize);
+const GuildSettings: ModelStatic<IGuildSettings> = (await import('../src/models/GuildSettings.js')).default(sequelize);
 
 /*
 	We 'objectify' the db data.

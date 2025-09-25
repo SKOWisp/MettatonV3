@@ -129,7 +129,6 @@ dist
 # Added extra
 node_modules
 .vs/
-.eslintrc.json
 test
 emojis.txt
 *.sqlite

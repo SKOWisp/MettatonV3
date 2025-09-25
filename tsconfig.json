@@ -21,7 +21,7 @@
 		"baseUrl": "./"
 	},
 	"ts-node": {
-         "esm": true
+        "esm": true
     },
 	"tsc-alias": {
     "verbose": false,
@@ -41,7 +41,6 @@
 		"node_modules",
 		"dist",
 		"test",
-		"src/DeployCommands.ts",
-		"src/DataBaseInit.ts"
+		"meta/*"
 	]
 } 

@@ -15,7 +15,6 @@ export default {
 		const guild = interaction.guild!;
 
 		// Get flags
-		interaction.command?.options
 		const flag = (interaction.options as any).getString('flag');
 
 		let showIDs: boolean = false;
@@ -56,7 +55,6 @@ export default {
 		}
 
 		if (showIDs) {
-			// eslint-disable-next-line no-useless-escape
 			const secondMessages = splitString(info[1], { prepend: '\`\`\`\n', append: '\n\`\`\`' });
 			(interaction.channel as SendableChannels).send('** IDs: **');
 			for (const msg of secondMessages) {
