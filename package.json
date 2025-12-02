@@ -30,7 +30,7 @@
     "spotify-url-info": "^3.2.6",
     "sqlite3": "^5.1.7",
     "url-parse": "^1.5.10",
-    "validator": "^13.11.0",
+    "validator": "^13.15.23",
     "youtubei.js": "^15.1.1",
     "ytpl": "^2.3.0"
   },
